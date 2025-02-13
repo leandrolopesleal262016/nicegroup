@@ -5,12 +5,7 @@
     <div class="page-inner py-5">
         <div class="d-flex align-items-left">
             <div>
-                <h2 class="text-white pb-2 fw-bold">Documentos</h2>
-            </div>
-            <div class="ml-auto">
-                <a href="{{ url_for('imoveis_blueprint.upload_documento') }}" class="btn btn-white btn-border btn-round">
-                    <i class="fa fa-plus"></i> Novo Documento
-                </a>
+                <h2 class="text-white pb-2 fw-bold">Lista de Documentos</h2>
             </div>
         </div>
     </div>
@@ -20,49 +15,82 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Lista de Documentos</h4>
-                </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Descrição</th>
-                                    <th>Data Emissão</th>
-                                    <th>Data Vencimento</th>
-                                    <th>Imóvel</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for doc in documentos %}
-                                <tr>
-                                    <td>{{ doc.tipo }}</td>
-                                    <td>{{ doc.descricao }}</td>
-                                    <td>{{ doc.data_emissao.strftime('%d/%m/%Y') }}</td>
-                                    <td>{{ doc.data_vencimento.strftime('%d/%m/%Y') }}</td>
-                                    <td>{{ doc.imovel.codigo }}</td>
-                                    <td>
-                                        <a href="#" class="btn btn-primary btn-sm">
-                                            <i class="fa fa-download"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-info btn-sm">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-danger btn-sm">
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                    <table class="table table-hover" style="width: 100%">
+    <thead>
+        <tr>
+            <th style="padding: 8px">Tipo</th>
+            <th style="padding: 8px">Descrição</th>
+            <th style="padding: 8px">Data Vencimento</th>
+            <th style="padding: 8px">Imóvel</th>
+            <th style="padding: 8px">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doc in documentos %}
+        <tr>
+            <td style="padding: 8px">{{ doc.tipo }}</td>
+            <td style="padding: 8px">{{ doc.descricao }}</td>
+            <td style="padding: 8px">{{ doc.data_vencimento.strftime('%d/%m/%Y') if doc.data_vencimento }}</td>
+            <td style="padding: 8px">{{ doc.imovel.codigo }}</td>
+            <td class="d-flex align-items-center justify-content-start" style="padding: 8px; min-width: 100px;">
+                <a href="{{ url_for('static', filename='uploads/documentos/' + doc.arquivo) }}" 
+                   class="btn btn-info btn-sm mr-1 py-1 d-flex align-items-center justify-content-center" 
+                   download
+                   style="height: 20px; line-height: 10px; width: 20px;">
+                    <i class="fa fa-download"></i>
+                </a>
+                
+                <a href="{{ url_for('imoveis_blueprint.editar_documento', id=doc.id) }}" 
+                   class="btn btn-primary btn-sm mx-1 py-1 d-flex align-items-center justify-content-center"
+                   style="height: 20px; line-height: 10px; width: 20px;">
+                    <i class="fa fa-edit"></i>
+                </a>
+                
+                <button class="btn btn-danger btn-sm ml-1 py-1 d-flex align-items-center justify-content-center" 
+                        style="height: 20px; line-height: 10px; width: 20px;"
+                        onclick="confirmarExclusao({{ doc.id }})">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="modalConfirmacao" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir este documento?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="formExclusao" method="POST">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function confirmarExclusao(id) {
+    document.getElementById('formExclusao').action = "{{ url_for('imoveis_blueprint.excluir_documento', id=0) }}".replace('0', id);
+    $('#modalConfirmacao').modal('show');
+}
+</script>
 {% endblock %}

@@ -236,3 +236,50 @@ def excluir_imovel(id):
     return redirect(url_for('imoveis_blueprint.index'))
 
 
+
+@blueprint.route('/documentos/excluir/<int:id>', methods=['POST'])
+@login_required
+def excluir_documento(id):
+    documento = Documento.query.get_or_404(id)
+    
+    # Remove physical file
+    arquivo_path = os.path.join(current_app.root_path, 'static', 'uploads', 'documentos', documento.arquivo)
+    if os.path.exists(arquivo_path):
+        os.remove(arquivo_path)
+    
+    db.session.delete(documento)
+    db.session.commit()
+    
+    flash('Documento excluído com sucesso!', 'success')
+    return redirect(url_for('imoveis_blueprint.lista_documentos'))
+
+@blueprint.route('/documentos/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
+def editar_documento(id):
+    documento = Documento.query.get_or_404(id)
+    imoveis = Imovel.query.all()
+    
+    if request.method == 'POST':
+        documento.tipo = request.form['tipo']
+        documento.descricao = request.form['descricao']
+        documento.imovel_id = request.form['imovel_id']
+        documento.data_emissao = datetime.strptime(request.form['data_emissao'], '%Y-%m-%d')
+        documento.data_vencimento = datetime.strptime(request.form['data_vencimento'], '%Y-%m-%d') if request.form['data_vencimento'] else None
+        
+        if 'arquivo' in request.files and request.files['arquivo'].filename:
+            # Remove old file
+            old_file = os.path.join(current_app.root_path, 'static', 'uploads', 'documentos', documento.arquivo)
+            if os.path.exists(old_file):
+                os.remove(old_file)
+                
+            # Save new file
+            arquivo = request.files['arquivo']
+            filename = secure_filename(arquivo.filename)
+            arquivo.save(os.path.join(current_app.root_path, 'static', 'uploads', 'documentos', filename))
+            documento.arquivo = filename
+            
+        db.session.commit()
+        flash('Documento atualizado com sucesso!', 'success')
+        return redirect(url_for('imoveis_blueprint.lista_documentos'))
+        
+    return render_template('imoveis/documentos/editar.html', documento=documento, imoveis=imoveis)

@@ -34,3 +34,46 @@ def verificar_vencimentos():
             enviar_notificacao_vencimento(novo_alerta, destinatarios)
     
     db.session.commit()
+
+import requests
+from datetime import datetime
+from apps.extensions import db
+from apps.imoveis.models import Alerta
+
+def consultar_cpfl(numero_cliente):
+    # CPFL API endpoint
+    url = "https://api.cpfl.com.br/consulta"
+    
+    # API credentials
+    headers = {
+        "Authorization": "Bearer YOUR_API_TOKEN",
+        "Content-Type": "application/json"
+    }
+    
+    # Request payload
+    data = {
+        "numeroCliente": numero_cliente
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, json=data)
+        response.raise_for_status()
+        
+        fatura = response.json()
+        
+        if fatura['status'] == 'ATRASADA':
+            # Create alert for overdue bill
+            alerta = Alerta(
+                tipo='fatura_energia',
+                descricao=f'Fatura de energia atrasada - Valor: R$ {fatura["valor"]}',
+                data_vencimento=datetime.strptime(fatura['dataVencimento'], '%Y-%m-%d'),
+                status='pendente',
+                imovel_id=fatura['imovel_id']
+            )
+            db.session.add(alerta)
+            db.session.commit()
+            
+        return fatura
+        
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}

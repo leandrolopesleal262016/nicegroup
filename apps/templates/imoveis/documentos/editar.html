@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Editar Documento</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Tipo</label>
+                            <input type="text" class="form-control" name="tipo" value="{{ documento.tipo }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <input type="text" class="form-control" name="descricao" value="{{ documento.descricao }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Imóvel</label>
+                            <select class="form-control" name="imovel_id" required>
+                                {% for imovel in imoveis %}
+                                <option value="{{ imovel.id }}" {% if imovel.id == documento.imovel_id %}selected{% endif %}>
+                                    {{ imovel.codigo }} - {{ imovel.endereco }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Data de Emissão</label>
+                            <input type="date" class="form-control" name="data_emissao" 
+                                   value="{{ documento.data_emissao.strftime('%Y-%m-%d') }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Data de Vencimento</label>
+                            <input type="date" class="form-control" name="data_vencimento" 
+                                   value="{{ documento.data_vencimento.strftime('%Y-%m-%d') if documento.data_vencimento }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Novo Arquivo (opcional)</label>
+                            <input type="file" class="form-control" name="arquivo">
+                            <small class="form-text text-muted">Deixe em branco para manter o arquivo atual</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
