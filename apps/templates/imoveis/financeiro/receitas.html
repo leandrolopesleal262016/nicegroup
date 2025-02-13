@@ -1,0 +1,119 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Receitas</h2>
+            </div>
+            <div class="ml-auto">
+                <button class="btn btn-white btn-border btn-round" data-toggle="modal" data-target="#addReceita">
+                    <i class="fa fa-plus"></i> Nova Receita
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Lista de Receitas</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Imóvel</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for receita in receitas %}
+                                <tr>
+                                    <td>{{ receita.data.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ receita.imovel.codigo }}</td>
+                                    <td>{{ receita.descricao }}</td>
+                                    <td>R$ {{ "%.2f"|format(receita.valor) }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ 'success' if receita.status == 'pago' else 'warning' }}">
+                                            {{ receita.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar Receita -->
+<div class="modal fade" id="addReceita" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Receita</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>×</span>
+                </button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Imóvel</label>
+                        <select class="form-control" name="imovel_id" required>
+                            <option value="">Selecione...</option>
+                            {% for imovel in imoveis %}
+                            <option value="{{ imovel.id }}">{{ imovel.codigo }} - {{ imovel.endereco }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" class="form-control" name="descricao" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor</label>
+                        <input type="number" step="0.01" class="form-control" name="valor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" class="form-control" name="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" name="status" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="pago">Pago</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

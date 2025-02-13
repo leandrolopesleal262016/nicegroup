@@ -1,0 +1,124 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Upload de Documento</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Novo Documento</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Tipo de Documento</label>
+                                    <select class="form-control" name="tipo" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="contrato">Contrato</option>
+                                        <option value="escritura">Escritura</option>
+                                        <option value="certidao">Certidão</option>
+                                        <option value="outros">Outros</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Imóvel</label>
+                                    <select class="form-control" name="imovel_id" required>
+                                        <option value="">Selecione...</option>
+                                        {% for imovel in imoveis %}
+                                        <option value="{{ imovel.id }}">{{ imovel.codigo }} - {{ imovel.endereco }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <input type="text" class="form-control" name="descricao" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Data de Emissão</label>
+                                    <input type="date" class="form-control" name="data_emissao" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Data de Vencimento</label>
+                                    <input type="date" class="form-control" name="data_vencimento">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Arquivo</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="arquivo" id="customFile" 
+                                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" required>
+                                <label class="custom-file-label" for="customFile">Escolher arquivo...</label>
+                            </div>
+                            <small class="form-text text-muted">Formatos aceitos: PDF, DOC, DOCX, JPG, JPEG, PNG, GIF</small>
+                            <div id="uploadFeedback"></div>
+                        </div>
+
+                        <div class="card-action">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa fa-save"></i> Salvar Documento
+                            </button>
+                            <a href="{{ url_for('imoveis_blueprint.lista_documentos') }}" class="btn btn-danger">
+                                <i class="fa fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+    var fileName = e.target.files[0].name;
+    var fileSize = e.target.files[0].size;
+    var label = this.nextElementSibling;
+    var feedback = document.getElementById('uploadFeedback');
+    
+    // Max file size (5MB)
+    if(fileSize > 5 * 1024 * 1024) {
+        feedback.innerHTML = `
+            <div class="alert alert-danger mt-2">
+                <i class="fa fa-times-circle"></i> Arquivo muito grande! Tamanho máximo: 5MB
+            </div>
+        `;
+        this.value = '';
+        label.innerHTML = 'Escolher arquivo...';
+        return;
+    }
+    
+    label.innerHTML = fileName;
+    feedback.innerHTML = `
+        <div class="alert alert-success mt-2">
+            <i class="fa fa-check-circle"></i> Arquivo "${fileName}" carregado com sucesso!
+            <br>
+            <small>Tamanho: ${(fileSize/1024/1024).toFixed(2)} MB</small>
+        </div>
+    `;
+});
+</script>
+{% endblock %}

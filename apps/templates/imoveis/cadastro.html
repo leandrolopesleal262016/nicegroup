@@ -1,0 +1,69 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Cadastro de Imóvel {% endblock %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Novo Imóvel</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Código do Imóvel</label>
+                                    <input type="text" class="form-control" name="codigo" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Status de Ocupação</label>
+                                    <select class="form-control" name="status_ocupacao">
+                                        <option value="Disponível">Disponível</option>
+                                        <option value="Alugado">Alugado</option>
+                                        <option value="Em Manutenção">Em Manutenção</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Endereço Completo</label>
+                            <input type="text" class="form-control" name="endereco" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Valor do Aluguel</label>
+                                    <input type="number" class="form-control" name="valor_aluguel" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Área (m²)</label>
+                                    <input type="number" class="form-control" name="area">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fotos do Imóvel</label>
+                            <input type="file" class="form-control" name="fotos" multiple>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Cadastrar Imóvel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

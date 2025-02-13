@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>{{ branding.APP_NAME }} - {{ title }}</title>
+
+		{% if custom_theme %}
+		<style>
+			:root {
+				--primary-color: {{ custom_theme.primary_color }};
+				--secondary-color: {{ custom_theme.secondary_color }};
+			}
+			
+			.bg-primary-gradient {
+				background: var(--primary-color) !important;
+			}
+			
+			.btn-primary {
+				background-color: var(--primary-color) !important;
+			}
+			
+			.text-primary {
+				color: var(--primary-color) !important;
+			}
+		</style>
+
+		{% if custom_theme.logo_url %}
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				const logoImg = document.querySelector('.navbar-brand img');
+				if (logoImg) {
+					logoImg.src = "{{ custom_theme.logo_url }}";
+				}
+			});
+		</script>
+		{% endif %}
+		{% endif %}
+	<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+	<link rel="icon" href="/static/assets/img/icon.ico" type="image/x-icon"/>
+	<link rel="canonical" href="https://appseed.us/admin-dashboards/flask-dashboard-atlantis-dark">
+
+	<!-- Fonts and icons -->
+	<script src="/static/assets/js/plugin/webfont/webfont.min.js"></script>
+	<script>
+		WebFont.load({
+			google: {"families":["Lato:300,400,700,900"]},
+			custom: {"families":["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], 
+			urls: ['/static/assets/css/fonts.min.css']},
+			active: function() {
+				sessionStorage.fonts = true;
+			}
+		});
+	</script>
+
+	<!-- CSS Files -->
+	<link rel="stylesheet" href="/static/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/assets/css/atlantis.min.css">
+
+	<!-- CSS Just for demo purpose, don't include it in your project -->
+	<link rel="stylesheet" href="/static/assets/css/demo.css">
+
+    <!-- Specific Page CSS goes HERE  -->
+    {% block stylesheets %}{% endblock stylesheets %}
+
+</head>
+<body data-background-color="dark">
+	<div class="wrapper">
+
+        {% include 'includes/navigation.html' %}
+
+        {% include 'includes/sidebar.html' %}
+
+		<div class="main-panel">
+			
+			{% block content %}{% endblock content %}
+
+			{% include 'includes/footer.html' %}
+
+		</div>
+        
+		{% if current_user.is_authenticated and current_user.username == "Leandro Leal" %}
+		<div class="custom-toggle">
+			<a href="{{ url_for('imoveis_blueprint.theme_settings') }}" class="btn btn-icon btn-round">
+				<i class="fa fa-cog"></i>
+			</a>
+		</div>
+		{% endif %}		
+
+	</div>
+
+	{% include 'includes/scripts.html' %}
+
+    <!-- Specific Page JS goes HERE  -->
+    {% block javascripts %}{% endblock javascripts %}
+
+</body>
+</html>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="sidebar-wrapper scrollbar scrollbar-inner">
+    <div class="sidebar-content">
+        <ul class="nav nav-primary">
+            <!-- Outros itens do menu -->
+            
+            {% if current_user.is_authenticated and current_user.username == "Leandro Leal" %}
+            <li class="nav-item">
+                <a href="{{ url_for('imoveis_blueprint.theme_settings') }}" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <p>Configurações de Tema</p>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+    {% if current_user.is_authenticated and current_user.username == "Leandro Leal" %}
+    <li class="nav-item">
+        <a href="{{ url_for('imoveis_blueprint.theme_settings') }}" class="nav-link">
+            <i class="fas fa-cog fa-lg"></i>
+        </a>
+    </li>
+    {% endif %}
+    <!-- Outros itens do menu -->
+</ul>
+
+

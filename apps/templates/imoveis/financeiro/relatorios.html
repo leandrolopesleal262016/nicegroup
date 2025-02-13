@@ -1,0 +1,210 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Relatórios Financeiros</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Período Inicial</label>
+                                <input type="date" class="form-control" name="data_inicio">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Período Final</label>
+                                <input type="date" class="form-control" name="data_fim">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Imóvel</label>
+                                <select class="form-control" name="imovel_id">
+                                    <option value="">Todos</option>
+                                    {% for imovel in imoveis %}
+                                    <option value="{{ imovel.id }}">{{ imovel.codigo }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label> </label>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fa fa-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="row">
+        <div class="col-sm-6 col-md-4">
+            <div class="card card-stats card-success">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 d-flex align-items-center">
+                            <div class="numbers">
+                                <p class="card-category">Receitas</p>
+                                <h4 class="card-title">R$ {{ "%.2f"|format(total_receitas|default(0)) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4">
+            <div class="card card-stats card-danger">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="fas fa-minus-circle"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 d-flex align-items-center">
+                            <div class="numbers">
+                                <p class="card-category">Despesas</p>
+                                <h4 class="card-title">R$ {{ "%.2f"|format(total_despesas|default(0)) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4">
+            <div class="card card-stats card-info">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 d-flex align-items-center">
+                            <div class="numbers">
+                                <p class="card-category">Saldo</p>
+                                <h4 class="card-title">R$ {{ "%.2f"|format((total_receitas|default(0) - total_despesas|default(0))) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Receitas x Despesas</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoBarras" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Distribuição por Imóvel</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoPizza" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de Barras
+var ctx = document.getElementById('graficoBarras').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+        datasets: [{
+            label: 'Receitas',
+            data: [12000, 19000, 3000, 5000, 2000, 3000],
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        },
+        {
+            label: 'Despesas',
+            data: [7000, 12000, 2000, 3000, 1000, 2000],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Gráfico de Pizza
+var ctx2 = document.getElementById('graficoPizza').getContext('2d');
+new Chart(ctx2, {
+    type: 'pie',
+    data: {
+        labels: ['Imóvel 1', 'Imóvel 2', 'Imóvel 3'],
+        datasets: [{
+            data: [300, 50, 100],
+            backgroundColor: [
+                '#1572E8',  // Azul
+                '#31CE36',  // Verde
+                '#6861CE'   // Roxo
+            ],
+            borderColor: [
+                '#1572E8',
+                '#31CE36',
+                '#6861CE'
+            ],
+            borderWidth: 1
+        }]
+    }
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.card-white {
+    background-color: white !important;
+}
+</style>
+{% endblock %}

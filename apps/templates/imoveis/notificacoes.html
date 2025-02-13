@@ -1,0 +1,67 @@
+{% extends "layouts/base.html" %}
+{% from "macros/pagination.html" import render_pagination %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Notificações do Sistema</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for notif in notificacoes.items %}
+                                <tr class="{{ 'table-warning' if not notif.lida else '' }}">
+                                    <td>{{ notif.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        <span class="badge badge-warning">{{ notif.tipo }}</span>
+                                    </td>
+                                    <td>{{ notif.descricao }}</td>
+                                    <td>
+                                        {% if notif.lida %}
+                                            <span class="badge badge-success">Lida</span>
+                                        {% else %}
+                                            <span class="badge badge-warning">Não lida</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm marcar-lida" 
+                                                data-id="{{ notif.id }}">
+                                            Marcar como lida
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Paginação -->
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ render_pagination(notificacoes) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Documentos</h2>
+            </div>
+            <div class="ml-auto">
+                <a href="{{ url_for('imoveis_blueprint.upload_documento') }}" class="btn btn-white btn-border btn-round">
+                    <i class="fa fa-plus"></i> Novo Documento
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Lista de Documentos</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Data Emissão</th>
+                                    <th>Data Vencimento</th>
+                                    <th>Imóvel</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documentos %}
+                                <tr>
+                                    <td>{{ doc.tipo }}</td>
+                                    <td>{{ doc.descricao }}</td>
+                                    <td>{{ doc.data_emissao.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ doc.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ doc.imovel.codigo }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-download"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-info btn-sm">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

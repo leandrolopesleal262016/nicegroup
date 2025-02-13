@@ -1,0 +1,62 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Alertas do Sistema {% endblock %}
+
+{% block content %}
+<div class="panel-header bg-warning-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Alertas</h2>
+                <h5 class="text-white op-7 mb-2">Sistema de Notificações e Vencimentos</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Vencimento</th>
+                                    <th>Imóvel</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alerta in alertas %}
+                                <tr>
+                                    <td>
+                                        <span class="badge badge-warning">{{ alerta.tipo }}</span>
+                                    </td>
+                                    <td>{{ alerta.descricao }}</td>
+                                    <td>{{ alerta.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ alerta.imovel.codigo }}</td>
+                                    <td>
+                                        <span class="badge badge-danger">{{ alerta.status }}</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm resolver-alerta" 
+                                                data-id="{{ alerta.id }}">
+                                            Resolver
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

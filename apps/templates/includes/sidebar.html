@@ -1,0 +1,140 @@
+		<!-- Sidebar -->
+		<div class="sidebar sidebar-style-2" data-background-color="dark2">			
+			<div class="sidebar-wrapper scrollbar scrollbar-inner">
+				<div class="sidebar-content">
+					<ul class="nav nav-primary">
+						<!-- Dashboard -->
+						<li class="nav-item">
+							<a href="{{ url_for('home_blueprint.index') }}">
+								<i class="fas fa-home"></i>
+								<p>Dashboard</p>
+							</a>
+						</li>
+
+						<!-- Imóveis -->
+						<li class="nav-item">
+							<a data-toggle="collapse" href="#imoveis">
+								<i class="fas fa-building"></i>
+								<p>Imóveis</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse" id="imoveis">
+								<ul class="nav nav-collapse">
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.index') }}">
+											<span class="sub-item">Lista de Imóveis</span>
+										</a>
+									</li>
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.cadastro') }}">
+											<span class="sub-item">Cadastrar Imóvel</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</li>
+
+						<!-- Alertas e Notificações -->
+						<li class="nav-item">
+							<a href="{{ url_for('imoveis_blueprint.alertas') }}">
+								<i class="fas fa-bell"></i>
+								<p>Alertas</p>
+							</a>
+						</li>
+
+						<!-- Configurações -->
+						{% if current_user.is_authenticated and current_user.username == "Leandro Leal" %}
+						<li class="nav-item">
+							<a data-toggle="collapse" href="#configuracoes">
+								<i class="fas fa-cog"></i>
+								<p>Configurações</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse" id="configuracoes">
+								<ul class="nav nav-collapse">
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.theme_settings') }}">
+											<span class="sub-item">Tema do Sistema</span>
+										</a>
+									</li>
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.configuracoes') }}">
+											<span class="sub-item">Configurações Gerais</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</li>
+						{% endif %}
+
+						<!-- Documentos -->
+						<li class="nav-item">
+							<a data-toggle="collapse" href="#documentos">
+								<i class="fas fa-file-alt"></i>
+								<p>Documentos</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse" id="documentos">
+								<ul class="nav nav-collapse">
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.lista_documentos') }}">
+											<span class="sub-item">Lista de Documentos</span>
+										</a>
+									</li>
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.upload_documento') }}">
+											<span class="sub-item">Upload de Documento</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</li>
+
+						<!-- Financeiro -->
+						<li class="nav-item">
+							<a data-toggle="collapse" href="#financeiro">
+								<i class="fas fa-dollar-sign"></i>
+								<p>Financeiro</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse" id="financeiro">
+								<ul class="nav nav-collapse">
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.receitas') }}">
+											<span class="sub-item">Receitas</span>
+										</a>
+									</li>
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.despesas') }}">
+											<span class="sub-item">Despesas</span>
+										</a>
+									</li>
+									<li>
+										<a href="{{ url_for('imoveis_blueprint.relatorios') }}">
+											<span class="sub-item">Relatórios</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<!-- End Sidebar -->
+        
+        <li class="nav-item">
+            <a href="/patrimonios">
+                <i class="fas fa-boxes"></i>
+                <p>Patrimônios</p>
+            </a>
+        </li>
+        
+        {% if current_user.is_authenticated and current_user.username == "Leandro Leal" %}
+        <li class="nav-item">
+            <a href="{{ url_for('imoveis_blueprint.theme_settings') }}">
+                <i class="fas fa-cog"></i>
+                <p>Configurações de Tema</p>
+            </a>
+        </li>
+        {% endif %}        

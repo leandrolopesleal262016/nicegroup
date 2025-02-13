@@ -1,0 +1,143 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard Imóveis {% endblock %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Dashboard</h2>
+                <h5 class="text-white op-7 mb-2">Métricas e Indicadores dos Imóveis</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <!-- Cards de Métricas -->
+    <div class="row">
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-primary card-round">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="fas fa-building"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">Total Imóveis</p>
+                                <h4 class="card-title">{{ total_imoveis }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-success card-round">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">Taxa Ocupação</p>
+                                <h4 class="card-title">{{ "%.1f"|format(taxa_ocupacao) }}%</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-info card-round">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">Receita Mensal</p>
+                                <h4 class="card-title">R$ {{ "%.2f"|format(receita_mensal) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Performance Mensal</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Status dos Imóveis</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de Performance
+var ctx1 = document.getElementById('performanceChart').getContext('2d');
+var performanceChart = new Chart(ctx1, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+        datasets: [{
+            label: 'Receita Mensal',
+            data: [12000, 19000, 15000, 17000, 16000, 20000],
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    }
+});
+
+// Gráfico de Status
+var ctx2 = document.getElementById('statusChart').getContext('2d');
+var statusChart = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: ['Alugados', 'Disponíveis', 'Em Manutenção'],
+        datasets: [{
+            data: [{{ imoveis_alugados }}, 
+                   {{ total_imoveis - imoveis_alugados }}, 
+                   0],
+            backgroundColor: [
+                'rgb(75, 192, 192)',
+                'rgb(255, 99, 132)',
+                'rgb(255, 205, 86)'
+            ]
+        }]
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

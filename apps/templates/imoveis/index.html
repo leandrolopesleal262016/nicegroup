@@ -1,0 +1,104 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Gestão de Imóveis {% endblock %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Imóveis</h2>
+            </div>
+            <div class="ml-auto">
+                <a href="{{ url_for('imoveis_blueprint.cadastro') }}" class="btn btn-white btn-border btn-round">
+                    <i class="fa fa-plus"></i> Novo Imóvel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Lista de Imóveis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Endereço</th>
+                                    <th>Status</th>
+                                    <th>Valor Aluguel</th>
+                                    <th>Área</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for imovel in imoveis %}
+                                <tr>
+                                    <td>{{ imovel.codigo }}</td>
+                                    <td>{{ imovel.endereco }}</td>
+                                    <td>{{ imovel.status_ocupacao }}</td>
+                                    <td>R$ {{ "%.2f"|format(imovel.valor_aluguel) }}</td>
+                                    <td>{{ imovel.area }} m²</td>
+                                    <td class="d-flex align-items-center">
+                                        <a href="{{ url_for('imoveis_blueprint.detalhes', id=imovel.id) }}" 
+                                           class="btn btn-primary btn-sm mr-2 py-1" style="height: 24px; line-height: 12px;">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        <button class="btn btn-danger btn-sm py-1" style="height: 24px; line-height: 12px;"
+                                                onclick="confirmarExclusao({{ imovel.id }}, '{{ imovel.codigo }}')">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="modalConfirmacao" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir o imóvel <strong id="codigoImovel"></strong>?</p>
+                <p class="text-danger">Esta ação não poderá ser desfeita!</p>
+            </div>
+            <div class="modal-footer">
+                <form id="formExclusao" method="POST">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function confirmarExclusao(id, codigo) {
+    document.getElementById('codigoImovel').textContent = codigo;
+    document.getElementById('formExclusao').action = "{{ url_for('imoveis_blueprint.excluir_imovel', id=0) }}".replace('0', id);
+    $('#modalConfirmacao').modal('show');
+}
+</script>
+{% endblock %}

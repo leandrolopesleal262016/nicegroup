@@ -1,0 +1,85 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Configurações do Tema</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Personalização Visual</h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="close" data-dismiss="alert">
+                                        <span>×</span>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Cor Primária</label>
+                            <input type="color" class="form-control" name="primary_color" 
+                                   value="{{ theme.primary_color if theme else '#1572E8' }}" 
+                                   style="height: 50px;">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Cor Secundária</label>
+                            <input type="color" class="form-control" name="secondary_color" 
+                                   value="{{ theme.secondary_color if theme else '#6861CE' }}"
+                                   style="height: 50px;">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Logo</label>
+                            <input type="file" class="form-control" name="logo" accept="image/*">
+                            {% if theme and theme.logo_path %}
+                            <div class="mt-2">
+                                <img src="{{ url_for('static', filename='uploads/logos/' + theme.logo_path) }}" 
+                                     alt="Logo atual" style="max-height: 100px;">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-action">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa fa-save"></i> Salvar Configurações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInputs = document.querySelectorAll('input[type="color"]');
+    colorInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            this.style.backgroundColor = this.value;
+        });
+    });
+});
+</script>
+{% endblock %}

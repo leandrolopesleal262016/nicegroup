@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Detalhes do Imóvel</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    {% if imovel.fotos %}
+                    <div class="gallery">
+                        {% for foto in imovel.fotos %}
+                        <img src="{{ url_for('static', filename='uploads/' + foto.caminho) }}" 
+                             class="img-fluid mb-2" alt="Foto do imóvel">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <h4 class="card-title">Informações do Imóvel {{ imovel.codigo }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Código:</strong> {{ imovel.codigo }}</p>
+                            <p><strong>Endereço:</strong> {{ imovel.endereco }}</p>
+                            <p><strong>Status:</strong> {{ imovel.status_ocupacao }}</p>
+                            <p><strong>Valor Aluguel:</strong> R$ {{ "%.2f"|format(imovel.valor_aluguel) }}</p>
+                            <p><strong>Área:</strong> {{ imovel.area }} m²</p>
+                            <p><strong>Data Cadastro:</strong> {{ imovel.data_cadastro.strftime('%d/%m/%Y') if imovel.data_cadastro else 'Não informado' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if imovel.fotos %}
+                            <div class="gallery">
+                                {% for foto in imovel.fotos %}
+                                <img src="{{ url_for('static', filename='uploads/' + foto.caminho) }}" 
+                                     class="img-fluid mb-2" alt="Foto do imóvel">
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

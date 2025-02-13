@@ -1,0 +1,95 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Configurações de Notificações</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Nova Configuração</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label>Tipo de Alerta</label>
+                            <select name="tipo_alerta" class="form-control">
+                                <option value="documento">Documentos</option>
+                                <option value="pagamento">Pagamentos</option>
+                                <option value="manutencao">Manutenção</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Antecedência (dias)</label>
+                            <input type="number" name="antecedencia" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Configurações Atuais</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Email</th>
+                                    <th>Antecedência</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for config in configs %}
+                                <tr>
+                                    <td>{{ config.tipo_alerta }}</td>
+                                    <td>{{ config.email_destinatario }}</td>
+                                    <td>{{ config.antecedencia_dias }} dias</td>
+                                    <td>
+                                        {% if config.ativo %}
+                                        <span class="badge badge-success">Ativo</span>
+                                        {% else %}
+                                        <span class="badge badge-danger">Inativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm">Desativar</button>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-danger btn-sm">Desativar</button>
+                                            <a href="{{ url_for('imoveis_blueprint.testar_email', config_id=config.id) }}" 
+                                               class="btn btn-info btn-sm">Testar</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
