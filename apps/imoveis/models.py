@@ -46,13 +46,14 @@ class Documento(db.Model):
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    tipo = db.Column(db.String(50))  # contrato, escritura, certidão, etc
+    tipo = db.Column(db.String(50))
     descricao = db.Column(db.String(200))
     data_emissao = db.Column(db.DateTime)
     data_vencimento = db.Column(db.DateTime)
-    arquivo = db.Column(db.String(200))  # caminho do arquivo
+    arquivo = db.Column(db.String(200))
     imovel_id = db.Column(db.Integer, db.ForeignKey('imovel.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    imovel = db.relationship('Imovel', backref='documentos')
 
 class UserTheme(db.Model):
     id = db.Column(db.Integer, primary_key=True)

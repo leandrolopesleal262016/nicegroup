@@ -4,6 +4,7 @@ from apps.extensions import db
 from apps.imoveis.models import Imovel, Alerta, Foto, ConfiguracaoNotificacao, Documento, Financeiro
 from sqlalchemy import func
 from apps.imoveis import blueprint
+from datetime import datetime
 
 @blueprint.route('/')
 @login_required
@@ -233,3 +234,5 @@ def excluir_imovel(id):
     
     flash('Imóvel excluído com sucesso!', 'success')
     return redirect(url_for('imoveis_blueprint.index'))
+
+
