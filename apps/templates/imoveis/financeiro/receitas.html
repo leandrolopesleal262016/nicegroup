@@ -83,6 +83,7 @@
                         <label>Imóvel</label>
                         <select class="form-control" name="imovel_id" required>
                             <option value="">Selecione...</option>
+                            <option value="exemplo">Exemplo - Rua Exemplo, 123</option>
                             {% for imovel in imoveis %}
                             <option value="{{ imovel.id }}">{{ imovel.codigo }} - {{ imovel.endereco }}</option>
                             {% endfor %}
