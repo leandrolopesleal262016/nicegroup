@@ -73,6 +73,7 @@ class Financeiro(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     imovel_id = db.Column(db.Integer, db.ForeignKey('imovel.id'))
+    imovel = db.relationship('Imovel', backref='financeiros')
     tipo = db.Column(db.String(50))  # receita ou despesa
     valor = db.Column(db.Float)
     data = db.Column(db.DateTime, default=datetime.utcnow)
