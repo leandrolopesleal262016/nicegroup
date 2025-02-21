@@ -1,0 +1,275 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Centro de Notificações {% endblock %}
+
+{% block content %}
+
+<div class="py-4">
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+        <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+            <li class="breadcrumb-item">
+                <a href="/">
+                    <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                </a>
+            </li>
+            <li class="breadcrumb-item"><a href="#">Notificações</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Centro de Notificações</li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Centro de Notificações</h1>
+            <p class="mb-0">Gerencie suas notificações e alertas aqui.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('notifications_blueprint.preferences') }}" class="btn btn-sm btn-gray-800 d-inline-flex align-items-center">
+                <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Preferências
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-body border-0 shadow mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">Todas as Notificações</h2>
+                <div>
+                    <a href="{{ url_for('notifications_blueprint.unread_notifications') }}" class="btn btn-sm btn-outline-primary me-2">
+                        Apenas não lidas <span class="badge bg-primary ms-1">{{ unread_count }}</span>
+                    </a>
+                    <form action="{{ url_for('notifications_blueprint.mark_all_read') }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-gray-500">
+                            Marcar todas como lidas
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if notifications %}
+                <div class="list-group list-group-flush">
+                    {% for notification in notifications %}
+                        <div class="list-group-item notification-item{% if not notification.is_read %} bg-light{% endif %}" data-id="{{ notification.id }}">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    {% if notification.notif_type == 'contract' %}
+                                        <div class="icon-shape icon-sm bg-primary text-white rounded-circle">
+                                            <i class="fas fa-file-contract"></i>
+                                        </div>
+                                    {% elif notification.notif_type == 'document' %}
+                                        <div class="icon-shape icon-sm bg-warning text-white rounded-circle">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                    {% elif notification.notif_type == 'maintenance' %}
+                                        <div class="icon-shape icon-sm bg-info text-white rounded-circle">
+                                            <i class="fas fa-tools"></i>
+                                        </div>
+                                    {% elif notification.notif_type == 'financial' %}
+                                        <div class="icon-shape icon-sm bg-success text-white rounded-circle">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                    {% elif notification.notif_type == 'property' %}
+                                        <div class="icon-shape icon-sm bg-secondary text-white rounded-circle">
+                                            <i class="fas fa-home"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="icon-shape icon-sm bg-gray-500 text-white rounded-circle">
+                                            <i class="fas fa-bell"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-lg-8 ps-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h4 class="h6 mb-0">
+                                                {% if not notification.is_read %}
+                                                    <span class="badge bg-primary me-2">Novo</span>
+                                                {% endif %}
+                                                {{ notification.title }}
+                                            </h4>
+                                            <small class="text-gray-500">
+                                                {% if notification.created_at %}
+                                                    {{ notification.created_at.strftime('%d/%m/%Y às %H:%M') }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 mb-0">{{ notification.message }}</p>
+                                </div>
+                                <div class="col-lg-3 text-end">
+                                    {% if notification.link %}
+                                        <a href="{{ notification.link }}" class="btn btn-sm btn-outline-gray-500 me-2">
+                                            <i class="fas fa-external-link-alt"></i> Visualizar
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if not notification.is_read %}
+                                        <form action="{{ url_for('notifications_blueprint.mark_read', notification_id=notification.id) }}" method="post" class="d-inline-block mark-read-form">
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-check"></i> Marcar como lida
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Paginação -->
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('notifications_blueprint.notification_center', page=page-1) }}">Anterior</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Anterior</span>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">{{ page }}</span>
+                        </li>
+                        
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('notifications_blueprint.notification_center', page=page+1) }}">Próxima</a>
+                        </li>
+                    </ul>
+                </nav>
+            {% else %}
+                <div class="alert alert-info">
+                    <div class="alert-inner--icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="alert-inner--text">
+                        <strong>Nenhuma notificação!</strong> Você não tem notificações no momento.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    // Inicializar notificações push se suportado pelo navegador
+    document.addEventListener('DOMContentLoaded', function() {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            initializePushNotifications();
+        } else {
+            console.log('Notificações push não são suportadas por este navegador');
+        }
+        
+        // AJAX para marcar como lido
+        document.querySelectorAll('.mark-read-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formAction = this.getAttribute('action');
+                const notificationItem = this.closest('.notification-item');
+                const notificationId = notificationItem.getAttribute('data-id');
+                
+                fetch(formAction, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Atualizar UI
+                        notificationItem.classList.remove('bg-light');
+                        this.remove();
+                        
+                        // Atualizar contador
+                        const countBadge = document.querySelector('.btn-outline-primary .badge');
+                        if (countBadge) {
+                            let count = parseInt(countBadge.textContent);
+                            countBadge.textContent = Math.max(0, count - 1);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao marcar notificação como lida:', error);
+                });
+            });
+        });
+    });
+    
+    async function initializePushNotifications() {
+        try {
+            // Registrar service worker se ainda não estiver registrado
+            const registration = await navigator.serviceWorker.register('/static/service-worker.js');
+            console.log('Service Worker registrado:', registration);
+            
+            // Verificar se já temos permissão
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                console.log('Permissão para notificações não concedida');
+                return;
+            }
+            
+            // Obter chave pública VAPID
+            const response = await fetch('/notifications/push/public-key');
+            const data = await response.json();
+            const vapidPublicKey = data.publicKey;
+            
+            if (!vapidPublicKey) {
+                console.log('Chave pública VAPID não disponível');
+                return;
+            }
+            
+            // Converter chave pública para Uint8Array
+            const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+            
+            // Obter subscrição existente ou criar nova
+            let subscription = await registration.pushManager.getSubscription();
+            
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: convertedKey
+                });
+            }
+            
+            // Enviar dados de subscrição para o servidor
+            await fetch('/notifications/push/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subscription: subscription
+                }),
+            });
+            
+            console.log('Registro de notificação push concluído');
+            
+        } catch (err) {
+            console.error('Erro ao inicializar notificações push:', err);
+        }
+    }
+    
+    // Função auxiliar para converter chave base64 para Uint8Array
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+            
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+</script>
+{% endblock javascripts %}

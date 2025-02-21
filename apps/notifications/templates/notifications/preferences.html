@@ -1,0 +1,468 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Preferências de Notificações {% endblock %}
+
+{% block content %}
+
+<div class="py-4">
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+        <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+            <li class="breadcrumb-item">
+                <a href="/">
+                    <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                </a>
+            </li>
+            <li class="breadcrumb-item"><a href="{{ url_for('notifications_blueprint.notification_center') }}">Notificações</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Preferências</li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Preferências de Notificações</h1>
+            <p class="mb-0">Configure como e quando deseja receber notificações.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('notifications_blueprint.notification_center') }}" class="btn btn-sm btn-gray-800 d-inline-flex align-items-center">
+                <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                Voltar para Notificações
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-body border-0 shadow mb-4">
+            <h2 class="h5 mb-4">Configurações de Entrega</h2>
+            
+            <div class="alert alert-info mb-4">
+                <div class="alert-inner--icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-inner--text">
+                    <p class="mb-0">Configure suas preferências para cada tipo de notificação. Você pode receber alertas através de diferentes canais.</p>
+                </div>
+            </div>
+
+            {% for notif_type in notification_types %}
+                <div class="card mb-4">
+                    <div class="card-header bg-white py-3">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h3 class="h6 mb-0">{{ notif_type.name }}</h3>
+                                <p class="small text-gray mb-0">{{ notif_type.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('notifications_blueprint.update_preferences') }}" method="post" id="preferences-form-{{ notif_type.id }}">
+                            <input type="hidden" name="notif_type" value="{{ notif_type.id }}">
+                            
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="push_enabled" id="push_enabled_{{ notif_type.id }}" 
+                                            {% if preferences[notif_type.id].push_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="push_enabled_{{ notif_type.id }}">
+                                            <i class="fas fa-bell me-2"></i> Notificações Push
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receba alertas em tempo real no navegador, mesmo quando o site estiver fechado.</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="in_app_enabled" id="in_app_enabled_{{ notif_type.id }}" 
+                                            {% if preferences[notif_type.id].in_app_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="in_app_enabled_{{ notif_type.id }}">
+                                            <i class="fas fa-desktop me-2"></i> Notificações no Aplicativo
+                                        </label>
+                                        <small class="form-text text-muted d-block">Veja notificações no centro de notificações do sistema.</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="email_enabled" id="email_enabled_{{ notif_type.id }}" 
+                                            {% if preferences[notif_type.id].email_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="email_enabled_{{ notif_type.id }}">
+                                            <i class="fas fa-envelope me-2"></i> Notificações por Email
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receba um email para cada alerta deste tipo.</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="threshold_days_{{ notif_type.id }}" class="form-label">Dias de Antecedência</label>
+                                    <input type="number" class="form-control" id="threshold_days_{{ notif_type.id }}" name="threshold_days" 
+                                           min="1" max="90" value="{{ preferences[notif_type.id].threshold_days or 30 }}">
+                                    <small class="form-text text-muted">Número de dias antes para começar a receber alertas.</small>
+                                </div>
+                                
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-sm btn-primary save-preferences" data-type="{{ notif_type.id }}">
+                                        <i class="fas fa-save me-2"></i> Salvar Preferências
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <div class="mt-3">
+                <h2 class="h5 mb-4">Gerenciamento de Dispositivos</h2>
+                <div class="alert alert-light mb-4">
+                    <p class="mb-2">Seus dispositivos registrados para receber notificações push:</p>
+                    <div id="device-list">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <span class="ms-2">Carregando dispositivos...</span>
+                    </div>
+                </div>
+                
+                <div class="d-flex mt-3">
+                    <button id="unregister-device" class="btn btn-sm btn-danger d-none">
+                        <i class="fas fa-trash-alt me-2"></i> Remover este Dispositivo
+                    </button>
+                    <button id="request-permission" class="btn btn-sm btn-primary ms-2 d-none">
+                        <i class="fas fa-bell me-2"></i> Permitir Notificações neste Dispositivo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const saveButtons = document.querySelectorAll('.save-preferences');
+        
+        saveButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const notifType = this.getAttribute('data-type');
+                const form = document.getElementById(`preferences-form-${notifType}`);
+                
+                // Enviar formulário via AJAX
+                const formData = new FormData(form);
+                
+                fetch(form.getAttribute('action'), {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar notificação de sucesso
+                        const notyf = new Notyf({
+                            position: {
+                                x: 'right',
+                                y: 'top',
+                            },
+                            types: [
+                                {
+                                    type: 'success',
+                                    background: '#4caf50',
+                                    icon: {
+                                        className: 'fas fa-check',
+                                        tagName: 'span',
+                                        color: '#fff'
+                                    },
+                                    dismissible: true
+                                }
+                            ]
+                        });
+                        notyf.success('Preferências salvas com sucesso!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao salvar preferências:', error);
+                    // Mostrar notificação de erro
+                    const notyf = new Notyf({
+                        position: {
+                            x: 'right',
+                            y: 'top',
+                        },
+                        types: [
+                            {
+                                type: 'error',
+                                background: '#f44336',
+                                icon: {
+                                    className: 'fas fa-times',
+                                    tagName: 'span',
+                                    color: '#fff'
+                                },
+                                dismissible: true
+                            }
+                        ]
+                    });
+                    notyf.error('Erro ao salvar preferências. Tente novamente.');
+                });
+            });
+        });
+        
+        // Inicializar gerenciamento de dispositivos
+        checkPushNotificationStatus();
+    });
+    
+    async function checkPushNotificationStatus() {
+        const deviceList = document.getElementById('device-list');
+        const unregisterBtn = document.getElementById('unregister-device');
+        const requestPermissionBtn = document.getElementById('request-permission');
+        
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            deviceList.innerHTML = `
+                <div class="alert alert-warning mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i> 
+                    Seu navegador não suporta notificações push.
+                </div>
+            `;
+            return;
+        }
+        
+        try {
+            const permissionStatus = Notification.permission;
+            
+            if (permissionStatus === 'denied') {
+                deviceList.innerHTML = `
+                    <div class="alert alert-danger mb-0">
+                        <i class="fas fa-times-circle me-2"></i> 
+                        Notificações bloqueadas para este navegador. Você precisa alterar as permissões nas configurações do navegador.
+                    </div>
+                `;
+                return;
+            }
+            
+            if (permissionStatus === 'default') {
+                deviceList.innerHTML = `
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i> 
+                        Notificações não estão habilitadas para este dispositivo.
+                    </div>
+                `;
+                requestPermissionBtn.classList.remove('d-none');
+                requestPermissionBtn.addEventListener('click', requestNotificationPermission);
+                return;
+            }
+            
+            // Verificar se há um service worker registrado
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (!registration) {
+                deviceList.innerHTML = `
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i> 
+                        Service Worker não registrado. Notificações não estão disponíveis.
+                    </div>
+                `;
+                return;
+            }
+            
+            // Verificar se há uma inscrição push
+            const subscription = await registration.pushManager.getSubscription();
+            if (!subscription) {
+                deviceList.innerHTML = `
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-bell-slash me-2"></i> 
+                        Este dispositivo não está registrado para receber notificações push.
+                    </div>
+                `;
+                requestPermissionBtn.classList.remove('d-none');
+                requestPermissionBtn.addEventListener('click', initializePushNotifications);
+                return;
+            }
+            
+            // Mostrar informações do dispositivo
+            const userAgent = navigator.userAgent;
+            const browser = detectBrowser(userAgent);
+            
+            deviceList.innerHTML = `
+                <div class="d-flex align-items-center mb-2">
+                    <div class="icon-shape icon-sm bg-success text-white rounded-circle me-3">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>
+                        <span class="d-block mb-1"><strong>${browser.name}</strong> em ${browser.os}</span>
+                        <small class="text-gray-500">Este dispositivo está registrado para receber notificações push.</small>
+                    </div>
+                </div>
+            `;
+            
+            unregisterBtn.classList.remove('d-none');
+            unregisterBtn.addEventListener('click', async () => {
+                try {
+                    // Cancelar a inscrição
+                    await subscription.unsubscribe();
+                    
+                    // Informar ao servidor
+                    await fetch('/notifications/push/unregister', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            endpoint: subscription.endpoint
+                        })
+                    });
+                    
+                    // Atualizar UI
+                    checkPushNotificationStatus();
+                    
+                    // Notificar usuário
+                    const notyf = new Notyf();
+                    notyf.success('Dispositivo removido com sucesso!');
+                    
+                } catch (error) {
+                    console.error('Erro ao remover dispositivo:', error);
+                    const notyf = new Notyf();
+                    notyf.error('Erro ao remover dispositivo. Tente novamente.');
+                }
+            });
+            
+        } catch (error) {
+            console.error('Erro ao verificar status de notificações:', error);
+            deviceList.innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <i class="fas fa-exclamation-circle me-2"></i> 
+                    Ocorreu um erro ao verificar o status das notificações.
+                </div>
+            `;
+        }
+    }
+    
+    async function requestNotificationPermission() {
+        try {
+            const permission = await Notification.permission;
+            if (permission === 'default') {
+                const result = await Notification.requestPermission();
+                if (result === 'granted') {
+                    initializePushNotifications();
+                } else {
+                    checkPushNotificationStatus();
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao solicitar permissão:', error);
+        }
+    }
+    
+    async function initializePushNotifications() {
+        try {
+            // Registrar service worker
+            const registration = await navigator.serviceWorker.register('/static/service-worker.js');
+            
+            // Obter chave pública VAPID
+            const response = await fetch('/notifications/push/public-key');
+            const data = await response.json();
+            const vapidPublicKey = data.publicKey;
+            
+            if (!vapidPublicKey) {
+                console.error('Chave pública VAPID não disponível');
+                return;
+            }
+            
+            // Converter chave pública para Uint8Array
+            const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+            
+            // Criar nova inscrição
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedKey
+            });
+            
+            // Registrar no servidor
+            await fetch('/notifications/push/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    subscription: subscription
+                }),
+            });
+            
+            // Atualizar UI
+            checkPushNotificationStatus();
+            
+            // Notificar usuário
+            const notyf = new Notyf();
+            notyf.success('Notificações habilitadas com sucesso!');
+            
+        } catch (error) {
+            console.error('Erro ao configurar notificações push:', error);
+            const notyf = new Notyf();
+            notyf.error('Erro ao configurar notificações. Tente novamente.');
+        }
+    }
+    
+    // Função auxiliar para converter chave base64 para Uint8Array
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+            
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+    
+    // Função para detectar navegador e sistema operacional
+    function detectBrowser(userAgent) {
+        const browsers = [
+            {name: 'Chrome', value: 'Chrome'},
+            {name: 'Firefox', value: 'Firefox'},
+            {name: 'Safari', value: 'Safari'},
+            {name: 'Opera', value: 'OPR'},
+            {name: 'Edge', value: 'Edg'},
+            {name: 'Internet Explorer', value: 'MSIE'}
+        ];
+        
+        const operatingSystems = [
+            {name: 'Windows', value: 'Windows'},
+            {name: 'Mac OS', value: 'Macintosh'},
+            {name: 'Linux', value: 'Linux'},
+            {name: 'Android', value: 'Android'},
+            {name: 'iOS', value: 'iPhone'}
+        ];
+        
+        let browserName = 'Navegador desconhecido';
+        let osName = 'Sistema desconhecido';
+        
+        // Detectar navegador
+        for (const browser of browsers) {
+            if (userAgent.indexOf(browser.value) !== -1) {
+                browserName = browser.name;
+                break;
+            }
+        }
+        
+        // Detectar sistema operacional
+        for (const os of operatingSystems) {
+            if (userAgent.indexOf(os.value) !== -1) {
+                osName = os.name;
+                break;
+            }
+        }
+        
+        return {
+            name: browserName,
+            os: osName
+        };
+    }
+</script>
+{% endblock javascripts %}

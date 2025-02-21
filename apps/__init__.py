@@ -7,20 +7,7 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
-# from flask_apscheduler import APScheduler
-
-# scheduler = APScheduler()
-
-# def init_scheduler(app):
-#     # Verifique se está rodando no PythonAnywhere
-#     if 'PYTHONANYWHERE_DOMAIN' in os.environ:
-#         # No PythonAnywhere, não inicie o scheduler
-#         app.logger.warning('Rodando no PythonAnywhere - scheduler desabilitado')
-#         return
-    
-#     # Código original para iniciar o scheduler
-#     scheduler.init_app(app)
-#     scheduler.start()
+import os  # Adicionado para usar no configure_database
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -32,7 +19,8 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    for module_name in ('authentication', 'home'):
+    # Adicione 'notifications' à lista de módulos
+    for module_name in ('authentication', 'home', 'notifications'):
         module = import_module('apps.{}.routes'.format(module_name))
         app.register_blueprint(module.blueprint)
 
@@ -58,7 +46,9 @@ def configure_database(app):
     def shutdown_session(exception=None):
         db.session.remove()
 
+
 from apps.authentication.oauth import github_blueprint
+
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
@@ -68,5 +58,5 @@ def create_app(config):
     
     register_blueprints(app)
     configure_database(app)
-    # init_scheduler(app)  # Responsavel pelos agendamentos de tarefas, buscar outra opção
+    
     return app

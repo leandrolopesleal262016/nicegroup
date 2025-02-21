@@ -5,6 +5,7 @@ Copyright (c) 2019 - present AppSeed.us
 
 import os, random, string
 
+
 class Config(object):
 
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -24,6 +25,11 @@ class Config(object):
     DB_NAME     = os.getenv('DB_NAME'     , None)
 
     USE_SQLITE  = True 
+
+    # Adicione aqui as chaves VAPID para notificações push
+    VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY', '')
+    VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY', '')
+    VAPID_CONTACT_EMAIL = os.getenv('VAPID_CONTACT_EMAIL', 'admin@example.com')
 
     # try to set up a Relational DBMS
     if DB_ENGINE and DB_NAME and DB_USERNAME:
@@ -54,7 +60,7 @@ class Config(object):
 
     # Assets Management
     ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets')    
-    
+
     SOCIAL_AUTH_GITHUB  = False
 
     GITHUB_ID      = os.getenv('GITHUB_ID')
@@ -62,7 +68,8 @@ class Config(object):
 
     # Enable/Disable Github Social Login    
     if GITHUB_ID and GITHUB_SECRET:
-         SOCIAL_AUTH_GITHUB  = True
+        SOCIAL_AUTH_GITHUB  = True
+
 
 class ProductionConfig(Config):
     DEBUG = False

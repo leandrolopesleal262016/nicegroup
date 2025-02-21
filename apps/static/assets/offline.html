@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Sem conexão - Sistema de Gerenciamento de Ativos Imobiliários</title>
+    
+    <!-- Estilo simplificado inline para não depender de arquivos externos -->
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f5f8fb;
+            color: #44476a;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin: 20px 0;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #262b40;
+        }
+        
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: #262b40;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #262b40;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn:hover {
+            background-color: #1a1f2e;
+        }
+        
+        .badge {
+            display: inline-block;
+            background-color: #f5f8fb;
+            color: #262b40;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            margin-right: 8px;
+        }
+        
+        .status-text {
+            font-size: 14px;
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .sync-info {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #66799e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">⚠️</div>
+            <div class="badge">Modo Offline</div>
+            <h1>Você está offline</h1>
+            <p>Não foi possível conectar ao servidor. Você está visualizando uma versão em cache.</p>
+            
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <div class="status-text">Sem conexão</div>
+            </div>
+            
+            <button class="btn" id="retry-btn">Tentar novamente</button>
+            
+            <div class="sync-info">
+                <p>Qualquer alteração feita enquanto estiver offline será sincronizada automaticamente quando a conexão for restaurada.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Verificar periodicamente se a conexão foi restaurada
+        document.getElementById('retry-btn').addEventListener('click', function() {
+            window.location.reload();
+        });
+        
+        // Verificar a cada 30 segundos se a conexão retornou
+        setInterval(function() {
+            if (navigator.onLine) {
+                // Se a conexão estiver restaurada, atualizar a página
+                window.location.reload();
+            }
+        }, 30000);
+        
+        // Atualizar o indicador de status quando a conexão mudar
+        window.addEventListener('online', function() {
+            document.querySelector('.status-dot').style.backgroundColor = '#10b981';
+            document.querySelector('.status-text').style.color = '#10b981';
+            document.querySelector('.status-text').textContent = 'Conexão restaurada';
+        });
+        
+        window.addEventListener('offline', function() {
+            document.querySelector('.status-dot').style.backgroundColor = '#dc3545';
+            document.querySelector('.status-text').style.color = '#dc3545';
+            document.querySelector('.status-text').textContent = 'Sem conexão';
+        });
+    </script>
+</body>
+</html>
