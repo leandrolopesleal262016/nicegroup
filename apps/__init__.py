@@ -7,20 +7,20 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
-from flask_apscheduler import APScheduler
+# from flask_apscheduler import APScheduler
 
-scheduler = APScheduler()
+# scheduler = APScheduler()
 
-def init_scheduler(app):
-    # Verifique se está rodando no PythonAnywhere
-    if 'PYTHONANYWHERE_DOMAIN' in os.environ:
-        # No PythonAnywhere, não inicie o scheduler
-        app.logger.warning('Rodando no PythonAnywhere - scheduler desabilitado')
-        return
+# def init_scheduler(app):
+#     # Verifique se está rodando no PythonAnywhere
+#     if 'PYTHONANYWHERE_DOMAIN' in os.environ:
+#         # No PythonAnywhere, não inicie o scheduler
+#         app.logger.warning('Rodando no PythonAnywhere - scheduler desabilitado')
+#         return
     
-    # Código original para iniciar o scheduler
-    scheduler.init_app(app)
-    scheduler.start()
+#     # Código original para iniciar o scheduler
+#     scheduler.init_app(app)
+#     scheduler.start()
 
 db = SQLAlchemy()
 login_manager = LoginManager()
