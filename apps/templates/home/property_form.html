@@ -1,0 +1,225 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block content %}
+
+<div class="py-4">
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+        <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('home_blueprint.index') }}">
+                    <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('home_blueprint.properties') }}">Imóveis</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">{{ title }}</h1>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card border-0 shadow components-section">
+            <div class="card-body">
+                <form method="post" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row mb-4">
+                        <div class="col-lg-8 col-sm-12">
+                            <div class="mb-3">
+                                <label for="address">{{ form.address.label }}</label>
+                                {{ form.address(class="form-control", placeholder="Rua, número, bairro, cidade, estado, CEP") }}
+                                {% if form.address.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.address.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <div class="mb-3">
+                                <label for="size">{{ form.size.label }}</label>
+                                {{ form.size(class="form-control", placeholder="ex: 75.5") }}
+                                {% if form.size.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.size.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-lg-4 col-sm-12">
+                            <div class="mb-3">
+                                <label for="property_type">{{ form.property_type.label }}</label>
+                                {{ form.property_type(class="form-select") }}
+                                {% if form.property_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.property_type.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <div class="mb-3">
+                                <label for="status">{{ form.status.label }}</label>
+                                {{ form.status(class="form-select") }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <div class="mb-3">
+                                <label for="adjustment_index">{{ form.adjustment_index.label }}</label>
+                                {{ form.adjustment_index(class="form-select") }}
+                                {% if form.adjustment_index.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.adjustment_index.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-lg-4 col-sm-12">
+                            <div class="mb-3">
+                                <label for="rent_value">{{ form.rent_value.label }}</label>
+                                {{ form.rent_value(class="form-control", placeholder="ex: 1500.00") }}
+                                {% if form.rent_value.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.rent_value.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <div class="mb-3">
+                                <label for="iptu">{{ form.iptu.label }}</label>
+                                {{ form.iptu(class="form-control", placeholder="ex: 800.00") }}
+                                {% if form.iptu.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.iptu.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <div class="mb-3">
+                                <label for="condominium_fee">{{ form.condominium_fee.label }}</label>
+                                {{ form.condominium_fee(class="form-control", placeholder="ex: 350.00") }}
+                                {% if form.condominium_fee.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.condominium_fee.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="description">{{ form.description.label }}</label>
+                                {{ form.description(class="form-control", rows=4, placeholder="Informações adicionais sobre o imóvel...") }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.description.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-check">
+                                {{ form.is_condominium(class="form-check-input") }}
+                                <label class="form-check-label" for="is_condominium">
+                                    {{ form.is_condominium.label }}
+                                </label>
+                                {% if form.is_condominium.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.is_condominium.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row justify-content-between">
+                        <div class="col-6">
+                            <a href="{{ url_for('home_blueprint.properties') }}" class="btn btn-gray-300">Cancelar</a>
+                        </div>
+                        <div class="col-6 text-end">
+                            <button type="submit" class="btn btn-gray-800">Salvar Imóvel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    // Script to enhance form functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide fields based on property type
+        const propertyTypeSelect = document.getElementById('property_type');
+        const condominiumFeeField = document.getElementById('condominium_fee').closest('.col-lg-4');
+        
+        propertyTypeSelect.addEventListener('change', function() {
+            if (this.value === 'apartamento') {
+                condominiumFeeField.style.display = 'block';
+            } else {
+                condominiumFeeField.style.display = 'none';
+            }
+        });
+        
+        // Initially trigger the change event to set the correct state
+        propertyTypeSelect.dispatchEvent(new Event('change'));
+        
+        // Show/hide fields based on condominium checkbox
+        const isCondominiumCheckbox = document.getElementById('is_condominium');
+        
+        isCondominiumCheckbox.addEventListener('change', function() {
+            // Future implementation: show fields for condominium units
+        });
+    });
+</script>
+{% endblock javascripts %}

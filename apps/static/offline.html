@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Nice Group</title>
+    <style>
+        body {
+            font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f8fb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #44476A;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+            max-width: 500px;
+            width: 90%;
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+            color: #66799e;
+        }
+        .btn {
+            display: inline-block;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #1B2559;
+            border: 0;
+            padding: 0.75rem 1.75rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #131b40;
+        }
+        .offline-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <!-- Substitua pelo logo da Nice Group -->
+            <svg class="offline-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m-3.536-3.536a3 3 0 010-5.656m2.121-2.121a5 5 0 010 9.9M3.515 5.515a9 9 0 0112.728 0" />
+            </svg>
+        </div>
+        <h1>Você está offline</h1>
+        <p>Parece que você está sem conexão com a Internet. Alguns recursos podem não estar disponíveis até que você se reconecte.</p>
+        <p>Você ainda pode acessar dados armazenados anteriormente.</p>
+        <button class="btn" onclick="window.location.reload()">Tentar novamente</button>
+    </div>
+</body>
+</html>
