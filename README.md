@@ -182,4 +182,4 @@ Nice Group - [contato@nicegroup.com.br](mailto:contato@nicegroup.com.br)
 
 ---
 
-Desenvolvido por [Seu Nome/Empresa] para Nice Group © 2025
+Desenvolvido por Leandro Leal para Nice Group © 2025
