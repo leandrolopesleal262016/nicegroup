@@ -68,5 +68,5 @@ def create_app(config):
     
     register_blueprints(app)
     configure_database(app)
-    init_scheduler(app)  # Adicione esta linha
+    # init_scheduler(app)  # Responsavel pelos agendamentos de tarefas, buscar outra opção
     return app
