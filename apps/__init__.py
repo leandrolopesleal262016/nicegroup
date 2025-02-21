@@ -12,20 +12,15 @@ from flask_apscheduler import APScheduler
 scheduler = APScheduler()
 
 def init_scheduler(app):
+    # Verifique se está rodando no PythonAnywhere
+    if 'PYTHONANYWHERE_DOMAIN' in os.environ:
+        # No PythonAnywhere, não inicie o scheduler
+        app.logger.warning('Rodando no PythonAnywhere - scheduler desabilitado')
+        return
+    
+    # Código original para iniciar o scheduler
     scheduler.init_app(app)
     scheduler.start()
-    
-    # Agende as tarefas
-    from apps.home.notifications import check_expiring_documents
-    
-    # Verificar documentos expirados todos os dias à meia-noite
-    scheduler.add_job(
-        id='check_expiring_documents',
-        func=check_expiring_documents,
-        trigger='cron',
-        hour=0,
-        minute=0
-    )
 
 db = SQLAlchemy()
 login_manager = LoginManager()
