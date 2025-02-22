@@ -228,9 +228,9 @@ def test_notification():
     notification_service.create_notification(
         user_id=current_user.id,
         title="Notificação de Teste",
-        message="Esta é uma notificação de teste para verificar o sistema.",
+        message="Esta é uma notificação de teste prioridade alta.",
         notif_type="property",
-        priority="normal"
+        priority="urgent"
     )
     return redirect(url_for('notifications_blueprint.notification_center'))
 

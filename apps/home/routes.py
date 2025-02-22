@@ -9,6 +9,76 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import uuid
+from flask import render_template, request, jsonify
+from apps.models.notification import Notification, NotificationPriority
+from apps.services.notification_service import NotificationService
+
+
+# Adicione estas rotas ao arquivo
+@blueprint.route('/notificacoes')
+@login_required
+def notification_center():
+    notifications = NotificationService.get_notifications_by_priority(current_user.id)
+    
+    # Agrupar notificações por prioridade para a visualização
+    grouped_notifications = {
+        'urgent': [],
+        'high': [],
+        'medium': [],
+        'low': []
+    }
+    
+    priority_map = {
+        NotificationPriority.URGENT: 'urgent',
+        NotificationPriority.HIGH: 'high',
+        NotificationPriority.MEDIUM: 'medium',
+        NotificationPriority.LOW: 'low'
+    }
+    
+    for notification in notifications:
+        key = priority_map.get(notification.priority, 'medium')
+        grouped_notifications[key].append(notification)
+    
+    return render_template(
+        'home/notifications.html',
+        segment='notifications',
+        grouped_notifications=grouped_notifications,
+        priorities=NotificationPriority
+    )
+
+@blueprint.route('/api/notificacoes', methods=['GET'])
+@login_required
+def get_notifications_api():
+    priority = request.args.get('priority')
+    limit = request.args.get('limit', 10, type=int)
+    
+    notifications = NotificationService.get_notifications_by_priority(
+        current_user.id, priority, limit
+    )
+    
+    return jsonify([{
+        'id': n.id,
+        'title': n.title,
+        'message': n.message,
+        'priority': n.priority,
+        'category': n.category,
+        'created_at': n.created_at.isoformat(),
+        'is_read': n.is_read
+    } for n in notifications])
+
+@blueprint.route('/api/notificacoes/<int:notification_id>/read', methods=['POST'])
+@login_required
+def mark_notification_as_read(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    
+    # Verificar se a notificação pertence ao usuário atual
+    if notification.user_id != current_user.id:
+        return jsonify({"error": "Não autorizado"}), 403
+    
+    notification.is_read = True
+    db.session.commit()
+    
+    return jsonify({"success": True})
 
 @blueprint.route('/index')
 @login_required

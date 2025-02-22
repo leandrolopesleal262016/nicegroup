@@ -58,5 +58,38 @@ def create_app(config):
     
     register_blueprints(app)
     configure_database(app)
+    # No arquivo apps/__init__.py - dentro da função create_app(config)
+
+    # Adicione este trecho antes do return app
+    @app.context_processor
+    def inject_notification_counts():
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            from apps.models.notification import Notification, NotificationPriority
+            # Contar notificações não lidas por prioridade
+            unread_urgent = Notification.query.filter_by(
+                user_id=current_user.id,
+                is_read=False,
+                priority=NotificationPriority.URGENT
+            ).count()
+            
+            unread_high = Notification.query.filter_by(
+                user_id=current_user.id,
+                is_read=False,
+                priority=NotificationPriority.HIGH
+            ).count()
+            
+            unread_total = Notification.query.filter_by(
+                user_id=current_user.id,
+                is_read=False
+            ).count()
+            
+            return {
+                'unread_urgent_count': unread_urgent,
+                'unread_high_count': unread_high,
+                'unread_count': unread_total
+            }
+        return {}    
     
     return app
+    
