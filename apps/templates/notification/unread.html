@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Notificações não lidas {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <h2>Notificações não lidas</h2>
+    {% if notifications %}
+        <ul class="list-group">
+        {% for notification in notifications %}
+            <li class="list-group-item">
+                {{ notification.message }}
+                <small class="text-muted">{{ notification.timestamp }}</small>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Não há notificações não lidas.</p>
+    {% endif %}
+</div>
+
+{% endblock content %}

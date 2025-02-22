@@ -62,9 +62,9 @@ def unread_notifications():
         unread_only=True,
         limit=10
     )
-    
+
     unread_count = len(notifications)
-    
+
     return render_template(
         'notifications/unread.html',
         segment='notifications',
