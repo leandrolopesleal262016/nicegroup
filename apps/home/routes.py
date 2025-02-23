@@ -10,15 +10,14 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 import uuid
 from flask import render_template, request, jsonify
-from apps.models.notification import Notification, NotificationPriority
+from apps.notifications.models import Notification, NotificationPriority
 from apps.services.notification_service import NotificationService
-
 
 # Adicione estas rotas ao arquivo
 @blueprint.route('/notificacoes')
 @login_required
 def notification_center():
-    notifications = NotificationService.get_notifications_by_priority(current_user.id)
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
     
     # Agrupar notificações por prioridade para a visualização
     grouped_notifications = {
@@ -28,16 +27,9 @@ def notification_center():
         'low': []
     }
     
-    priority_map = {
-        NotificationPriority.URGENT: 'urgent',
-        NotificationPriority.HIGH: 'high',
-        NotificationPriority.MEDIUM: 'medium',
-        NotificationPriority.LOW: 'low'
-    }
-    
+    # Distribuir as notificações nos grupos corretos
     for notification in notifications:
-        key = priority_map.get(notification.priority, 'medium')
-        grouped_notifications[key].append(notification)
+        grouped_notifications[notification.priority].append(notification)
     
     return render_template(
         'home/notifications.html',
@@ -372,3 +364,25 @@ def get_segment(request):
     except:
         return None
 
+def init_notifications(app):
+    @app.context_processor
+    def inject_notifications():
+        from flask_login import current_user
+        
+        if current_user.is_authenticated:
+            notifications = Notification.query.filter_by(
+                user_id=current_user.id
+            ).order_by(Notification.created_at.desc()).all()
+            
+            grouped_notifications = {
+                'urgent': [],
+                'high': [],
+                'medium': [],
+                'low': []
+            }
+            
+            for notification in notifications:
+                grouped_notifications[notification.priority].append(notification)
+                
+            return {'grouped_notifications': grouped_notifications}
+        return {'grouped_notifications': {'urgent': [], 'high': [], 'medium': [], 'low': []}}

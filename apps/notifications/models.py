@@ -8,74 +8,91 @@ from apps import db
 from flask_login import UserMixin
 from apps.authentication.models import Users
 
+class NotificationPriority:
+    URGENT = 'urgent'
+    HIGH = 'high'
+    MEDIUM = 'medium'
+    LOW = 'low'
+
 class Notification(db.Model):
-    """
-    Modelo para armazenar notificações individuais
-    """
-    __tablename__ = 'Notifications'
+    __tablename__ = 'notifications'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
-    title = db.Column(db.String(100), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    icon = db.Column(db.String(100), nullable=True)
-    link = db.Column(db.String(255), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))  # Changed to match the actual table name
+    title = db.Column(db.String(255))
+    message = db.Column(db.Text)
+    priority = db.Column(db.String(50))
+    category = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     read_at = db.Column(db.DateTime, nullable=True)
-    notif_type = db.Column(db.String(50), nullable=False)  # 'contract', 'maintenance', 'document', etc.
-    source_id = db.Column(db.Integer, nullable=True)  # ID do recurso relacionado (imóvel, contrato, etc.)
-    source_type = db.Column(db.String(50), nullable=True)  # Tipo de recurso ('property', 'contract', etc.)
-    priority = db.Column(db.String(20), default='normal')  # 'high', 'normal', 'low'
+    is_read = db.Column(db.Boolean, default=False)
     
-    # Relacionamentos
-    user = db.relationship('Users', backref='notifications')
+    user = db.relationship('Users', backref=db.backref('user_notifications', lazy=True))
     
     @property
-    def is_read(self):
-        return self.read_at is not None
+    def formatted_created_at(self):
+        """Retorna a data formatada para exibição"""
+        return self.created_at.strftime('%d/%m/%Y %H:%M')
     
     def mark_as_read(self):
-        self.read_at = datetime.utcnow()
+        """Marca a notificação como lida"""
+        self.is_read = True
         db.session.commit()
+    
+    @staticmethod
+    def get_unread_count(user_id):
+        """Retorna o número de notificações não lidas para um usuário"""
+        return Notification.query.filter_by(user_id=user_id, is_read=False).count()
+    
+    @staticmethod
+    def get_highest_priority(user_id):
+        """Retorna a prioridade mais alta entre as notificações não lidas"""
+        priorities = {'urgent': 4, 'high': 3, 'medium': 2, 'low': 1, 'normal': 0}
+        notifications = Notification.query.filter_by(user_id=user_id, is_read=False).all()
+        if not notifications:
+            return 'normal'
+        return max(notifications, key=lambda x: priorities.get(x.priority, 0)).priority
         
     def __repr__(self):
         return f"<Notification {self.id}: {self.title}>"
-
 
 class NotificationPreference(db.Model):
     """
     Modelo para armazenar preferências de notificação do usuário
     """
-    __tablename__ = 'NotificationPreferences'
+    __tablename__ = 'notification_preferences'
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'notif_type', name='uq_user_notif_type'),
+        {'extend_existing': True}
+    )
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
-    notif_type = db.Column(db.String(50), nullable=False)  # 'contract', 'maintenance', 'document', etc.
+    notif_type = db.Column(db.String(50), nullable=False)
     
     # Canais de entrega
     push_enabled = db.Column(db.Boolean, default=True)
     in_app_enabled = db.Column(db.Boolean, default=True)
     email_enabled = db.Column(db.Boolean, default=True)
     
-    # Limiares específicos (por exemplo, quantos dias antes de um evento)
+    # Limiares específicos
     threshold_days = db.Column(db.Integer, nullable=True)
     
     # Relacionamentos
-    user = db.relationship('Users', backref='notification_preferences')
-    
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'notif_type', name='uq_user_notif_type'),
-    )
+    user = db.relationship('Users', backref=db.backref('user_notification_preferences', lazy=True))
     
     def __repr__(self):
         return f"<NotificationPreference {self.user_id}: {self.notif_type}>"
 
-
 class PushSubscription(db.Model):
     """
-    Modelo para armazenar inscrições de notificações push (endpoints dos navegadores)
+    Modelo para armazenar inscrições de notificações push
     """
-    __tablename__ = 'PushSubscriptions'
+    __tablename__ = 'push_subscriptions'
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'endpoint', name='uq_user_endpoint'),
+        {'extend_existing': True}
+    )
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
@@ -87,11 +104,12 @@ class PushSubscription(db.Model):
     last_used = db.Column(db.DateTime, nullable=True)
     
     # Relacionamentos
-    user = db.relationship('Users', backref='push_subscriptions')
+    user = db.relationship('Users', backref=db.backref('user_push_subscriptions', lazy=True))
     
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'endpoint', name='uq_user_endpoint'),
-    )
+    def update_last_used(self):
+        """Atualiza a data do último uso"""
+        self.last_used = datetime.utcnow()
+        db.session.commit()
     
     def __repr__(self):
         return f"<PushSubscription {self.id}: {self.user_id}>"

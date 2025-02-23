@@ -1,57 +1,42 @@
-# resolver_tabela_notificacoes.py
-import sys
-import os
-from sqlalchemy import text, inspect
-
-# Adiciona o diretório raiz ao path do Python
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
 from apps import create_app, db
 from apps.config import config_dict
-from apps.models.notification import Notification
+from sqlalchemy import text
 
 app = create_app(config_dict['Debug'])
 
-def resolver_tabela_notificacoes():
+def recreate_notifications_table():
     with app.app_context():
         try:
-            print("Verificando tabelas existentes no banco de dados...")
-            
-            inspector = inspect(db.engine)
-            tabelas = inspector.get_table_names()
-            print(f"Tabelas encontradas: {tabelas}")
-            
-            # Remover ambas as possíveis tabelas
-            with db.engine.begin() as conn:
-                # Excluir tabela com nome minúsculo
+            # Drop tabela existente
+            with db.engine.connect() as conn:
                 conn.execute(text("DROP TABLE IF EXISTS notifications"))
-                print("Tabela 'notifications' (minúsculo) removida ou não existia.")
-                
-                # Verificar se existe tabela com N maiúsculo
-                if '"Notifications"' in tabelas:
-                    conn.execute(text('DROP TABLE IF EXISTS "Notifications"'))
-                    print('Tabela "Notifications" (maiúsculo) removida.')
+                conn.execute(text('DROP TABLE IF EXISTS "Notifications"'))
+                conn.commit()
             
-            # Recriando a tabela
-            print("\nTabela definida no modelo Notification:")
-            print(f"Nome da tabela: {Notification.__tablename__}")
+            # Criar tabela com a nova estrutura
+            create_table_sql = """
+            CREATE TABLE notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER REFERENCES Users(id),
+                title VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                priority VARCHAR(20) DEFAULT 'normal',
+                category VARCHAR(50),
+                related_entity_type VARCHAR(50),
+                related_entity_id INTEGER,
+                is_read BOOLEAN DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
             
-            # Criar a tabela
-            try:
-                Notification.__table__.create(db.engine)
-                print(f"Tabela '{Notification.__tablename__}' criada com sucesso.")
-                
-                # Verificar colunas da tabela
-                inspector = inspect(db.engine)
-                colunas = [c['name'] for c in inspector.get_columns(Notification.__tablename__)]
-                print(f"Colunas: {colunas}")
-            except Exception as e:
-                print(f"Erro ao criar tabela: {e}")
+            with db.engine.connect() as conn:
+                conn.execute(text(create_table_sql))
+                conn.commit()
+            
+            print("Tabela de notificações recriada com sucesso!")
             
         except Exception as e:
-            print(f"Erro durante o processo: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"Erro ao recriar tabela: {e}")
 
 if __name__ == "__main__":
-    resolver_tabela_notificacoes()
+    recreate_notifications_table()

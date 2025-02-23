@@ -1,12 +1,32 @@
 # apps/services/notification_service.py
+from sqlalchemy import case
 from apps import db
-from apps.models.notification import Notification, NotificationPriority
-from datetime import datetime, timedelta
+from apps.notifications.models import Notification, NotificationPreference, PushSubscription
 
 class NotificationService:
+    """
+    Serviço para envio e gerenciamento de notificações
+    """
+    
+    def __init__(self, app=None):
+        """
+        Inicializa o serviço de notificações
+        """
+        self.app = app
+    
     @staticmethod
-    def create_notification(user_id, title, message, priority=NotificationPriority.MEDIUM, 
-                           category=None, related_entity_type=None, related_entity_id=None):
+    def get_notifications_by_priority(user_id):
+        notifications = {
+            'urgent': Notification.query.filter_by(user_id=user_id, priority='urgent').order_by(Notification.created_at.desc()).all(),
+            'high': Notification.query.filter_by(user_id=user_id, priority='high').order_by(Notification.created_at.desc()).all(),
+            'medium': Notification.query.filter_by(user_id=user_id, priority='medium').order_by(Notification.created_at.desc()).all(),
+            'low': Notification.query.filter_by(user_id=user_id, priority='low').order_by(Notification.created_at.desc()).all()
+        }
+        return notifications
+
+    
+    def create_notification(self, user_id, title, message, priority='normal',
+                          category=None, related_entity_type=None, related_entity_id=None):
         """
         Cria uma nova notificação
         """
@@ -22,52 +42,65 @@ class NotificationService:
         
         db.session.add(notification)
         db.session.commit()
+        
+        # Verificar preferências do usuário e enviar por canais habilitados
+        preferences = NotificationPreference.query.filter_by(
+            user_id=user_id,
+            notif_type=category if category else 'general'
+        ).first()
+        
         return notification
-    
-    @staticmethod
-    def get_notifications_by_priority(user_id, priority=None, limit=50):
+
+    def get_user_notifications(self, user_id, limit=None, offset=0, unread_only=False):
         """
-        Retorna as notificações de um usuário filtradas por prioridade
+        Obtém notificações de um usuário
         """
         query = Notification.query.filter_by(user_id=user_id)
         
-        if priority:
-            query = query.filter_by(priority=priority)
+        if unread_only:
+            query = query.filter_by(is_read=False)
+        
+        query = query.order_by(
+            case({
+                'urgent': 4,
+                'high': 3,
+                'medium': 2,
+                'low': 1
+            }, value=Notification.priority),
+            Notification.created_at.desc()
+        )
+        
+        if limit:
+            query = query.offset(offset).limit(limit)
             
-        return query.order_by(Notification.created_at.desc()).limit(limit).all()
-    
-    @staticmethod
-    def determine_priority_for_contract_expiration(days_remaining):
+        return query.all()
+
+    def mark_notification_read(self, notification_id, user_id):
         """
-        Determina a prioridade com base no tempo restante para expiração de contratos
+        Marca uma notificação como lida
         """
-        if days_remaining <= 15:
-            return NotificationPriority.URGENT
-        elif days_remaining <= 30:
-            return NotificationPriority.HIGH
-        elif days_remaining <= 60:
-            return NotificationPriority.MEDIUM
-        else:
-            return NotificationPriority.LOW
-    
-    @staticmethod
-    def determine_priority_for_document_expiration(days_remaining, document_type):
+        notification = Notification.query.filter_by(
+            id=notification_id,
+            user_id=user_id
+        ).first()
+        
+        if notification:
+            notification.is_read = True
+            db.session.commit()
+            return True
+        return False
+
+    def mark_all_read(self, user_id):
         """
-        Determina a prioridade com base no tempo restante para expiração de documentos
+        Marca todas as notificações de um usuário como lidas
         """
-        if document_type in ['AVCB', 'CLB', 'Alvará']:
-            # Documentos críticos têm maior prioridade
-            if days_remaining <= 15:
-                return NotificationPriority.URGENT
-            elif days_remaining <= 30:
-                return NotificationPriority.HIGH
-            else:
-                return NotificationPriority.MEDIUM
-        else:
-            # Documentos regulares
-            if days_remaining <= 7:
-                return NotificationPriority.HIGH
-            elif days_remaining <= 15:
-                return NotificationPriority.MEDIUM
-            else:
-                return NotificationPriority.LOW
+        notifications = Notification.query.filter_by(
+            user_id=user_id,
+            is_read=False
+        ).all()
+        
+        for notification in notifications:
+            notification.is_read = True
+        
+        db.session.commit()
+        return len(notifications)

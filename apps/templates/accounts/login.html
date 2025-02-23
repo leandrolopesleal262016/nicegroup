@@ -104,44 +104,55 @@
 
 {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
     let deferredPrompt;
     const installContainer = document.getElementById('installContainer');
     const installButton = document.getElementById('installButton');
 
+    // Função para verificar se o app está rodando como PWA
+    function isRunningAsPWA() {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+               window.navigator.standalone ||
+               document.referrer.includes('android-app://');
+    }
+
+    // Função para mostrar ou esconder o botão de instalação
+    function toggleInstallButton() {
+        if (isRunningAsPWA()) {
+            installContainer.style.display = 'none';
+        } else {
+            installContainer.style.display = 'block';
+        }
+    }
+
+    // Chama a função imediatamente para configurar o estado inicial do botão
+    toggleInstallButton();
+
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Previne o mini-infobar de aparecer em mobile
         e.preventDefault();
-        // Guarda o evento para que possa ser acionado mais tarde
         deferredPrompt = e;
-        // Atualiza a interface do usuário para notificar o usuário de que pode instalar o PWA
-        installContainer.style.display = 'block';
+        toggleInstallButton();
     });
 
     installButton.addEventListener('click', async () => {
         if (!deferredPrompt) {
             return;
         }
-        // Mostra o prompt de instalação
         deferredPrompt.prompt();
-        // Espera o usuário responder ao prompt
         const { outcome } = await deferredPrompt.userChoice;
-        // Opcionalmente, envie analytics do resultado escolhido
         console.log(`User response to the install prompt: ${outcome}`);
-        // Usamos o prompt, e não podemos usar novamente, descarte
         deferredPrompt = null;
-        // Esconde o botão de instalação
-        installContainer.style.display = 'none';
+        toggleInstallButton();
     });
 
-    // Detecta se o app já está instalado
+    // Detecta se o app foi instalado
     window.addEventListener('appinstalled', () => {
-        // Esconde o botão de instalação
-        installContainer.style.display = 'none';
-        // Opcionalmente, envie analytics de que o app foi instalado
         console.log('PWA was installed');
+        toggleInstallButton();
     });
+
+    // Adiciona um listener para mudanças no modo de exibição
+    window.matchMedia('(display-mode: standalone)').addListener(toggleInstallButton);
 </script>
 {% endblock javascripts %}

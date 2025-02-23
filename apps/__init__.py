@@ -7,7 +7,8 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
-import os  # Adicionado para usar no configure_database
+from sqlalchemy import case
+import os
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -32,12 +33,11 @@ def configure_database(app):
         try:
             db.create_all()
         except Exception as e:
-
-            print('> Error: DBMS Exception: ' + str(e) )
+            print('> Error: DBMS Exception: ' + str(e))
 
             # fallback to SQLite
             basedir = os.path.abspath(os.path.dirname(__file__))
-            app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
 
             print('> Fallback to SQLite ')
             db.create_all()
@@ -58,38 +58,43 @@ def create_app(config):
     
     register_blueprints(app)
     configure_database(app)
-    # No arquivo apps/__init__.py - dentro da função create_app(config)
 
-    # Adicione este trecho antes do return app
     @app.context_processor
-    def inject_notification_counts():
+    def inject_notifications():
         from flask_login import current_user
         if current_user.is_authenticated:
-            from apps.models.notification import Notification, NotificationPriority
-            # Contar notificações não lidas por prioridade
-            unread_urgent = Notification.query.filter_by(
-                user_id=current_user.id,
-                is_read=False,
-                priority=NotificationPriority.URGENT
-            ).count()
+            from apps.notifications.models import Notification
+
+            notifications = Notification.query.filter_by(
+                user_id=current_user.id
+            ).order_by(Notification.created_at.desc()).all()
             
-            unread_high = Notification.query.filter_by(
-                user_id=current_user.id,
-                is_read=False,
-                priority=NotificationPriority.HIGH
-            ).count()
-            
-            unread_total = Notification.query.filter_by(
-                user_id=current_user.id,
-                is_read=False
-            ).count()
-            
-            return {
-                'unread_urgent_count': unread_urgent,
-                'unread_high_count': unread_high,
-                'unread_count': unread_total
+            grouped_notifications = {
+                'urgent': [],
+                'high': [],
+                'medium': [],
+                'low': []
             }
-        return {}    
+            
+            for notification in notifications:
+                grouped_notifications[notification.priority].append(notification)
+            
+            # Adicionar contagens específicas
+            unread_urgent_count = len([n for n in notifications if n.priority == 'urgent' and not n.is_read])
+            unread_high_count = len([n for n in notifications if n.priority == 'high' and not n.is_read])
+            unread_count = len([n for n in notifications if not n.is_read])
+                
+            return {
+                'grouped_notifications': grouped_notifications,
+                'unread_urgent_count': unread_urgent_count,
+                'unread_high_count': unread_high_count,
+                'unread_count': unread_count
+            }
+        return {
+            'grouped_notifications': {'urgent': [], 'high': [], 'medium': [], 'low': []},
+            'unread_urgent_count': 0,
+            'unread_high_count': 0,
+            'unread_count': 0
+        }
     
     return app
-    
