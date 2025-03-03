@@ -16762,44 +16762,39 @@ label {
   .icon.active-dot svg {
     height: 0.7rem; }
 
-.icon-shape {
-  width: 4rem;
-  height: 4rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center; }
-  .icon-shape svg {
-    height: 2rem; }
-  .icon-shape.icon-xxs {
-    width: 1.5rem;
-    height: 1.5rem; }
-    .icon-shape.icon-xxs svg {
-      height: 1rem; }
-  .icon-shape.icon-xs {
-    width: 2.5rem;
-    height: 2.5rem; }
-    .icon-shape.icon-xs svg {
-      height: 1.25rem; }
-  .icon-shape.icon-sm {
-    width: 3.275rem;
-    height: 3.275rem; }
-    .icon-shape.icon-sm svg {
-      height: 1.5rem; }
-  .icon-shape.icon-lg {
-    width: 5rem;
-    height: 5rem; }
-    .icon-shape.icon-lg svg {
-      height: 3.5rem; }
-  .icon-shape.icon-xl {
-    width: 6rem;
-    height: 6rem; }
-    .icon-shape.icon-xl svg {
-      height: 4.5rem; }
-  .icon-shape.icon-xxl {
-    width: 7.5rem;
-    height: 7.5rem; }
-    .icon-shape.icon-xxl svg {
-      height: 6rem; }
+    .icon-shape {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        color: #555;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    /* Ajuste o tamanho dos ícones conforme necessário */
+    .icon-shape .icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    
+    /* Remover classes de cores existentes */
+    .icon-shape-primary, .icon-shape-success, .icon-shape-danger, 
+    .icon-shape-warning, .icon-shape-tertiary {
+        background-color: transparent !important;
+        color: #555 !important;
+    }
+    
+    /* Hover effect discreto */
+    .icon-shape:hover {
+        color: #262B40;
+    }
+    
+    /* Ajustes para os ícones do alerta */
+    .card-body .icon-xs {
+        color: #555;
+    }
+
 
 .rating-star:hover {
   cursor: pointer;
