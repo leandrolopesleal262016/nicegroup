@@ -16746,6 +16746,7 @@ label {
  * = Icon boxes
  */
 .icon {
+  transform: scale(1.4);
   height: 2rem; }
   .icon.icon-xxs {
     height: 1rem; }
@@ -16763,13 +16764,14 @@ label {
     height: 0.7rem; }
 
     .icon-shape {
-        display: inline-flex;
+        display: flex;
         align-items: center;
         justify-content: center;
         width: 3rem;
         height: 3rem;
         color: #555;
         transition: all 0.2s ease-in-out;
+        
     }
     
     /* Ajuste o tamanho dos ícones conforme necessário */
