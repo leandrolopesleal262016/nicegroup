@@ -77,19 +77,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-link text-dark dropdown-toggle dropdown-toggle-split m-0 p-0" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"></path></svg>
-                                        <span class="visually-hidden">Toggle Dropdown</span>
-                                    </button>
-                                    <div class="dropdown-menu py-0">
-                                        <a class="dropdown-item rounded-top" href="#"><span class="fas fa-eye me-2"></span>Ver Detalhes</a>
-                                        <a class="dropdown-item" href="#"><span class="fas fa-edit me-2"></span>Editar</a>
-                                        <a class="dropdown-item" href="#"><span class="fas fa-image me-2"></span>Gerenciar Fotos</a>
-                                        <a class="dropdown-item" href="#"><span class="fas fa-file me-2"></span>Documentos</a>
-                                        <a class="dropdown-item text-danger rounded-bottom" href="#"><span class="fas fa-trash-alt me-2"></span>Excluir</a>
-                                    </div>
-                                </div>
+                                <a href="{{ url_for('home_blueprint.property_detail', id=property.id) }}" class="btn btn-sm btn-gray-800">Detalhes</a>
                             </td>
                         </tr>
                         {% endfor %}

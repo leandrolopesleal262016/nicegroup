@@ -258,8 +258,7 @@
                             <th class="border-bottom" scope="col">Ações</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Loop through recent properties -->
+                    <tbody>                        
                         {% for property in properties[:5] if properties %}
                         <tr>
                             <td class="fw-bold">{{ property.address }}</td>
@@ -277,7 +276,7 @@
                             </td>
                             <td>R$ {{ "%.2f"|format(property.rent_value or 0) }}</td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-gray-800">Detalhes</a>
+                                <a href="{{ url_for('home_blueprint.property_detail', id=property.id) }}" class="btn btn-sm btn-gray-800">Detalhes</a>
                             </td>
                         </tr>
                         {% else %}
