@@ -105,12 +105,20 @@ def index():
                            properties=recent_properties)
 
 @blueprint.route('/properties')
-@login_required
 def properties():
-    properties = Property.query.filter_by(parent_property_id=None).order_by(Property.created_at.desc()).all()
+    # Obter o parâmetro de status da URL
+    status_filter = request.args.get('status', None)
+    
+    # Consultar propriedades com filtro de status, se fornecido
+    if status_filter:
+        properties_list = Property.query.filter_by(status=status_filter).all()
+    else:
+        properties_list = Property.query.all()
+        
     return render_template('home/properties.html', 
-                           segment='properties',
-                           properties=properties)
+                           properties=properties_list, 
+                           active_status=status_filter)
+
 
 @blueprint.route('/property/add', methods=['GET', 'POST'])
 @login_required
