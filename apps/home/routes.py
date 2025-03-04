@@ -296,6 +296,8 @@ def add_property_image(property_id):
     
     return redirect(url_for('home_blueprint.property_detail', id=property.id))
 
+# Função corrigida para adicionar transações
+
 @blueprint.route('/property/<int:property_id>/add-transaction', methods=['POST'])
 @login_required
 def add_transaction(property_id):
@@ -303,46 +305,58 @@ def add_transaction(property_id):
     form = TransactionForm()
     
     if form.validate_on_submit():
-        # Primeiro verificar se temos um comprovante
-        document = None
-        if form.file.data:
-            file = form.file.data
-            if file and allowed_file(file.filename, {'pdf', 'jpg', 'jpeg', 'png'}):
-                file_path = save_file(file, 'uploads/receipts')
-                
-                # Criar documento para o comprovante
-                document = Document(
-                    title=f"Comprovante - {form.description.data or form.category.data}",
-                    filename=file.filename,
-                    path=file_path,
-                    document_type='comprovante',
-                    issue_date=form.date.data,
-                    property_id=property.id
-                )
-                
-                db.session.add(document)
-                db.session.flush()  # Obter ID sem commit
-        
-        transaction = Transaction(
-            date=form.date.data,
-            amount=form.amount.data,
-            type=form.type.data,
-            category=form.category.data,
-            description=form.description.data,
-            payment_method=form.payment_method.data,
-            status=form.status.data,
-            recurrence=form.recurrence.data,
-            property_id=property.id,
-            document_id=document.id if document else None
-        )
-        
-        db.session.add(transaction)
-        db.session.commit()
-        
-        flash('Transação adicionada com sucesso!', 'success')
+        try:
+            # Primeiro verificar se temos um comprovante
+            document = None
+            if form.file.data and form.file.data.filename != '':
+                file = form.file.data
+                if allowed_file(file.filename, {'pdf', 'jpg', 'jpeg', 'png'}):
+                    file_path = save_file(file, 'uploads/receipts')
+                    
+                    # Criar documento para o comprovante
+                    document = Document(
+                        title=f"Comprovante - {form.description.data or form.category.data}",
+                        filename=file.filename,
+                        path=file_path,
+                        document_type='comprovante',
+                        issue_date=form.date.data,
+                        property_id=property.id
+                    )
+                    
+                    db.session.add(document)
+                    db.session.flush()  # Obter ID sem commit
+            
+            # Criar a transação com os dados do formulário
+            transaction = Transaction(
+                date=form.date.data,
+                amount=form.amount.data,
+                type=form.type.data,
+                category=form.category.data,
+                description=form.description.data,
+                payment_method=form.payment_method.data,
+                status=form.status.data,
+                recurrence=form.recurrence.data,
+                property_id=property.id,
+                document_id=document.id if document else None
+            )
+            
+            # Adicionar e salvar no banco de dados
+            db.session.add(transaction)
+            db.session.commit()
+            
+            flash('Transação adicionada com sucesso!', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Erro ao adicionar transação: {str(e)}")
+            flash(f'Erro ao adicionar transação: {str(e)}', 'error')
+    else:
+        # Se houver erros no formulário, exibir mensagens
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'error')
     
     return redirect(url_for('home_blueprint.property_detail', id=property.id))
-
 @blueprint.route('/<template>')
 @login_required
 def route_template(template):

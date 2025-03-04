@@ -101,5 +101,5 @@ class TransactionForm(FlaskForm):
     ], validators=[DataRequired()])
     file = FileField('Comprovante', validators=[
         Optional(),
-        FileAllowed(['pdf', 'jpg', 'png'], 'Somente PDF, JPG ou PNG')
+        FileAllowed(['pdf', 'jpg', 'jpeg', 'png'], 'Somente PDF, JPG ou PNG')
     ])

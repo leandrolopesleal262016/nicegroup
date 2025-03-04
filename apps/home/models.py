@@ -98,8 +98,8 @@ class Transaction(db.Model):
     document = db.relationship('Document')
     
     def __repr__(self):
-        return f'<Transaction {self.type} {self.amount}>'
-
+        return f'<Transaction {self.id}: {self.type} {self.amount}>'
+    
 class Alert(db.Model):
     __tablename__ = 'Alerts'
     

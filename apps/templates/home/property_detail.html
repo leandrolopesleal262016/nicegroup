@@ -346,66 +346,74 @@
         </div>
     </div>
     
-    <!-- Transações -->
-    <div class="col-12 mb-4">
-        <div class="card border-0 shadow">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h2 class="fs-5 fw-bold mb-0">Transações</h2>
-                    </div>
-                    <div class="col text-end">
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddTransaction">
-                            <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                            Adicionar Transação
-                        </button>
-                    </div>
-                </div>
+    <!-- Seção de Transações -->
+<div class="col-12 mb-4">
+    <div class="card border-0 shadow">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="fs-5 fw-bold mb-0">Transações</h2>
+            <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalAddTransaction">
+                <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                Adicionar Transação
+            </button>
+        </div>
+        <div class="card-body">
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>DATA</th>
+                            <th>TIPO</th>
+                            <th>CATEGORIA</th>
+                            <th>DESCRIÇÃO</th>
+                            <th>VALOR</th>
+                            <th>STATUS</th>
+                            <th>COMPROVANTE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.date.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <span class="badge bg-{% if transaction.type == 'receita' %}success{% else %}danger{% endif %}">
+                                    {{ transaction.type|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ transaction.category|capitalize }}</td>
+                            <td>{{ transaction.description or '-' }}</td>
+                            <td>R$ {{ "%.2f"|format(transaction.amount) }}</td>
+                            <td>
+                                {% if transaction.status == 'pendente' %}
+                                <span class="badge bg-warning">Pendente</span>
+                                {% elif transaction.status == 'pago' %}
+                                <span class="badge bg-success">Pago</span>
+                                {% else %}
+                                <span class="badge bg-danger">Atrasado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.document %}
+                                <a href="{{ url_for('static', filename=transaction.document.path) }}" class="btn btn-sm btn-primary" target="_blank">
+                                    <svg class="icon icon-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </a>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                {% if transactions %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Tipo</th>
-                                <th>Categoria</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Status</th>
-                                <th>Comprovante</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for transaction in transactions %}
-                            <tr>
-                                <td>{{ transaction.date.strftime('%d/%m/%Y') }}</td>
-                                <td>
-                                    <span class="badge bg-{% if transaction.status == 'pendente' %}warning{% elif transaction.status == 'pago' %}success{% else %}danger{% endif %}">
-                                        {{ transaction.status|capitalize }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% if transaction.document %}
-                                    <a href="{{ url_for('static', filename=transaction.document.path) }}" target="_blank" class="btn btn-sm btn-gray-800">
-                                        <svg class="icon icon-xs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    </a>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <span class="text-gray-500">Não há transações para este imóvel.</span>
-                </div>
-                {% endif %}
+            {% else %}
+            <div class="text-center py-4">
+                <p class="text-gray-500">Não há transações para este imóvel.</p>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddTransaction">
+                    Adicionar Primeira Transação
+                </button>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -457,7 +465,7 @@
     </div>
 </div>
 
-<!-- Modal para adicionar transação -->
+<!-- Modal para adicionar transação (corrigido) -->
 <div class="modal fade" id="modalAddTransaction" tabindex="-1" role="dialog" aria-labelledby="modalAddTransactionLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -470,44 +478,44 @@
                     {{ transaction_form.csrf_token }}
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="date" class="form-label">{{ transaction_form.date.label.text }}</label>
-                            {{ transaction_form.date(class="form-control", type="date") }}
+                            <label for="date" class="form-label">Data</label>
+                            {{ transaction_form.date(class="form-control", type="date", required=true) }}
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="amount" class="form-label">{{ transaction_form.amount.label.text }}</label>
-                            {{ transaction_form.amount(class="form-control", type="number", step="0.01") }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="type" class="form-label">{{ transaction_form.type.label.text }}</label>
-                            {{ transaction_form.type(class="form-control") }}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="category" class="form-label">{{ transaction_form.category.label.text }}</label>
-                            {{ transaction_form.category(class="form-control") }}
+                            <label for="amount" class="form-label">Valor (R$)</label>
+                            {{ transaction_form.amount(class="form-control", type="number", step="0.01", required=true) }}
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="payment_method" class="form-label">{{ transaction_form.payment_method.label.text }}</label>
+                            <label for="type" class="form-label">Tipo</label>
+                            {{ transaction_form.type(class="form-control", required=true) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label">Categoria</label>
+                            {{ transaction_form.category(class="form-control", required=true) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="payment_method" class="form-label">Método de Pagamento</label>
                             {{ transaction_form.payment_method(class="form-control") }}
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">{{ transaction_form.status.label.text }}</label>
-                            {{ transaction_form.status(class="form-control") }}
+                            <label for="status" class="form-label">Status</label>
+                            {{ transaction_form.status(class="form-control", required=true) }}
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="recurrence" class="form-label">{{ transaction_form.recurrence.label.text }}</label>
-                        {{ transaction_form.recurrence(class="form-control") }}
+                        <label for="recurrence" class="form-label">Recorrência</label>
+                        {{ transaction_form.recurrence(class="form-control", required=true) }}
                     </div>
                     <div class="mb-3">
-                        <label for="description" class="form-label">{{ transaction_form.description.label.text }}</label>
+                        <label for="description" class="form-label">Descrição</label>
                         {{ transaction_form.description(class="form-control") }}
                     </div>
                     <div class="mb-3">
-                        <label for="file" class="form-label">{{ transaction_form.file.label.text }}</label>
+                        <label for="file" class="form-label">Comprovante</label>
                         {{ transaction_form.file(class="form-control") }}
                     </div>
                 </div>
