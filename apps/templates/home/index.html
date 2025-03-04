@@ -80,7 +80,71 @@
                 </div>
             </div>
         </a>
+
+<div class="row">
+    <!-- Card Imóveis Totais -->
+    <div class="col-12 col-sm-6 col-xl-3 mb-4">
+        <a href="{{ url_for('home_blueprint.properties') }}" class="text-decoration-none">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <div class="row d-flex align-items-center">
+                        <div class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
+                            <div class="icon-shape me-4 me-sm-0" style="color: #000000;">
+                                <svg class="icon" width="24" height="24" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="d-sm-none">
+                                <h2 class="h5">Imóveis Totais</h2>
+                                <h3 class="fw-extrabold mb-1">{{ properties_count }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-7 px-xl-0">
+                            <div class="d-none d-sm-block">
+                                <h2 class="h5">Imóveis Totais</h2>
+                                <h3 class="fw-extrabold mb-1">{{ properties_count }}</h3>
+                            </div>
+                            <small>Cadastrados no sistema</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
     </div>
+
+    <!-- Card Alugados -->
+    <div class="col-12 col-sm-6 col-xl-3 mb-4">
+        <a href="{{ url_for('home_blueprint.properties', status='alugado') }}" class="text-decoration-none">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <div class="row d-flex align-items-center">
+                        <div class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
+                            <div class="icon-shape me-4 me-sm-0">
+                                <svg class="icon" width="24" height="24" fill="#228B22" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="d-sm-none">
+                                <h2 class="fw-extrabold h5">Alugados</h2>
+                                <h3 class="mb-1">{{ rented_count }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-7 px-xl-0">
+                            <div class="d-none d-sm-block">
+                                <h2 class="h5">Alugados</h2>
+                                <h3 class="fw-extrabold mb-1">{{ rented_count }}</h3>
+                            </div>
+                            <small>
+                                <span class="fw-normal">Imóveis com inquilinos</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Card Desocupados -->
     <div class="col-12 col-sm-6 col-xl-3 mb-4">
         <a href="{{ url_for('home_blueprint.properties', status='desocupado') }}" class="text-decoration-none">
             <div class="card border-0 shadow hover-card">
@@ -109,6 +173,8 @@
             </div>
         </a>
     </div>
+
+    <!-- Card Em Reforma -->
     <div class="col-12 col-sm-6 col-xl-3 mb-4">
         <a href="{{ url_for('home_blueprint.properties', status='em reforma') }}" class="text-decoration-none">
             <div class="card border-0 shadow hover-card">
