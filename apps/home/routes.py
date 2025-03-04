@@ -128,10 +128,6 @@ def properties():
                            properties=properties_list, 
                            active_status=status_filter)
 
-                           segment='properties',
-                           properties=properties,
-                           filtered_status=status)  # Passamos o status para o template
-
 @blueprint.route('/property/add', methods=['GET', 'POST'])
 @login_required
 def add_property():
