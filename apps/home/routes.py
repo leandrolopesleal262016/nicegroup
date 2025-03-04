@@ -111,22 +111,14 @@ def properties():
     
     # Consultar propriedades com filtro de status, se fornecido
     if status_filter:
-        properties_list = Property.query.filter_by(status=status_filter).all()
+        properties_list = Property.query.filter_by(status=status_filter, parent_property_id=None).order_by(Property.created_at.desc()).all()
     else:
-        properties_list = Property.query.all()
-        
-    # Obter o parâmetro status da URL, se existir
-    status = request.args.get('status')
-    
-    # Filtrar propriedades com base no status, se fornecido
-    if status:
-        properties = Property.query.filter_by(status=status, parent_property_id=None).order_by(Property.created_at.desc()).all()
-    else:
-        properties = Property.query.filter_by(parent_property_id=None).order_by(Property.created_at.desc()).all()
+        properties_list = Property.query.filter_by(parent_property_id=None).order_by(Property.created_at.desc()).all()
     
     return render_template('home/properties.html', 
-                           properties=properties_list, 
-                           active_status=status_filter)
+                          properties=properties_list, 
+                          active_status=status_filter)
+
 
 @blueprint.route('/property/add', methods=['GET', 'POST'])
 @login_required
