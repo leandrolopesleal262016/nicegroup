@@ -120,8 +120,10 @@
     // Função para mostrar ou esconder o botão de instalação
     function toggleInstallButton() {
         if (isRunningAsPWA()) {
+            // Se estiver rodando como PWA, esconde o botão
             installContainer.style.display = 'none';
         } else {
+            // Se estiver rodando no navegador, sempre mostra o botão
             installContainer.style.display = 'block';
         }
     }
@@ -129,21 +131,28 @@
     // Chama a função imediatamente para configurar o estado inicial do botão
     toggleInstallButton();
 
+    // Quando o evento beforeinstallprompt ocorrer, armazena para uso posterior
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        toggleInstallButton();
+        console.log('Prompt de instalação disponível!');
     });
 
+    // Manipulador para o clique no botão de instalação
     installButton.addEventListener('click', async () => {
-        if (!deferredPrompt) {
-            return;
+        if (deferredPrompt) {
+            // Se temos um prompt armazenado, usamos ele
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+        } else {
+            // Se não temos um prompt, mostramos instruções alternativas
+            alert('Para instalar o aplicativo: \n\n' +
+                  '• No Chrome/Edge: Clique no menu (três pontos) e selecione "Instalar aplicativo"\n' +
+                  '• No Safari (iOS): Toque no ícone de compartilhamento e selecione "Adicionar à Tela de Início"\n' +
+                  '• No Firefox: Clique no menu e selecione "Instalar"');
         }
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to the install prompt: ${outcome}`);
-        deferredPrompt = null;
-        toggleInstallButton();
     });
 
     // Detecta se o app foi instalado
@@ -153,6 +162,10 @@
     });
 
     // Adiciona um listener para mudanças no modo de exibição
-    window.matchMedia('(display-mode: standalone)').addListener(toggleInstallButton);
+    window.matchMedia('(display-mode: standalone)').addEventListener('change', toggleInstallButton);
+
+    // Executa quando a página carrega para garantir o estado correto
+    window.addEventListener('load', toggleInstallButton);
 </script>
+
 {% endblock javascripts %}
