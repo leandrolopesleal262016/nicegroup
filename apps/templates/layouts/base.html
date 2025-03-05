@@ -14,6 +14,8 @@
   Nice Group - {% block title %}{% endblock %}
 </title>
 
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="manifest" href="/static/manifest.json">
 <meta name="theme-color" content="#262B40">
 
@@ -65,6 +67,34 @@
 <link rel="apple-touch-icon" href="/static/assets/img/brand/icon-192x192.png">
 
 <script src="{{ config.ASSETS_ROOT }}/js/offline.js"></script>
+
+<style>
+  /* Forçar círculos perfeitos para elementos icon-shape */
+  .icon-shape {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    aspect-ratio: 1 !important;
+  }
+  
+  /* Aplicar o mesmo para variantes icon-xs */
+  .icon-xs {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+  }
+  
+  /* Garantir que o border-radius seja perfeito */
+  .rounded-circle {
+    border-radius: 50% !important;
+  }
+</style>
 
 <!-- Specific Page JS goes HERE  -->    
 {% block stylesheets %}{% endblock stylesheets %}

@@ -41,22 +41,47 @@ def notification_center():
 @blueprint.route('/api/notificacoes', methods=['GET'])
 @login_required
 def get_notifications_api():
-    priority = request.args.get('priority')
-    limit = request.args.get('limit', 10, type=int)
+    try:
+        priority = request.args.get('priority')
+        limit = request.args.get('limit', 10, type=int)
+        
+        # Consultar notificações diretamente usando o modelo
+        query = Notification.query.filter_by(user_id=current_user.id)
+        
+        # Filtrar por prioridade se especificado
+        if priority:
+            query = query.filter_by(priority=priority)
+        
+        # Ordenar por data de criação (mais recente primeiro)
+        query = query.order_by(Notification.created_at.desc())
+        
+        # Limitar resultados
+        if limit:
+            query = query.limit(limit)
+        
+        # Executar a consulta
+        notifications = query.all()
+        
+        # Serializar para JSON
+        result = []
+        for n in notifications:
+            result.append({
+                'id': n.id,
+                'title': n.title,
+                'message': n.message,
+                'priority': n.priority,
+                'category': getattr(n, 'category', None),
+                'created_at': n.created_at.isoformat() if hasattr(n, 'created_at') else None,
+                'is_read': getattr(n, 'is_read', False)
+            })
+        
+        return jsonify(result)
     
-    notifications = NotificationService.get_notifications_by_priority(
-        current_user.id, priority, limit
-    )
-    
-    return jsonify([{
-        'id': n.id,
-        'title': n.title,
-        'message': n.message,
-        'priority': n.priority,
-        'category': n.category,
-        'created_at': n.created_at.isoformat(),
-        'is_read': n.is_read
-    } for n in notifications])
+    except Exception as e:
+        # Log detalhado do erro
+        print(f"Erro ao obter notificações: {str(e)}")
+        # Retornar erro 500 com mensagem
+        return jsonify({"error": "Erro ao buscar notificações"}), 500
 
 @blueprint.route('/api/notificacoes/<int:notification_id>/read', methods=['POST'])
 @login_required

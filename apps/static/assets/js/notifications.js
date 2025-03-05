@@ -1,12 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const notificationBadge = document.getElementById('notification-badge');
-    const notificationList = document.querySelector('.notification-list');
+    // Referências aos elementos
     const notificationBell = document.querySelector('.notification-bell');
+    const notificationContainer = document.querySelector('.notification-container');
     
-    // Intervalo de atualização (a cada 1 minuto)
-    const updateInterval = 60 * 1000;
+    // Função para formatar a data
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
     
-    // Função para obter ícone baseado no tipo de notificação e prioridade
+    // Função para obter ícone baseado na categoria
+    function getCategoryIcon(category) {
+        const icons = {
+            'document': 'fas fa-file-alt',
+            'contract': 'fas fa-file-contract',
+            'maintenance': 'fas fa-tools',
+            'financial': 'fas fa-money-bill-wave',
+            'property': 'fas fa-home',
+            'default': 'fas fa-bell'
+        };
+        return icons[category] || icons.default;
+    }
+    
+    // Função para obter estilo baseado na prioridade
     function getNotificationStyle(priority) {
         const styles = {
             'urgent': {
@@ -38,124 +60,131 @@ document.addEventListener('DOMContentLoaded', function() {
         return styles[priority] || styles.normal;
     }
     
-    // Função para atualizar o contador de notificações
-    function updateNotificationCount() {
-        fetch('/notifications/api/unread-count')
+    // Função para carregar notificações via AJAX
+    function loadNotifications() {
+        if (!notificationContainer) return;
+        
+        // Mostrar indicador de carregamento
+        notificationContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>';
+        
+        fetch('/api/notificacoes')
             .then(response => response.json())
             .then(data => {
-                if (data.count > 0) {
-                    notificationBadge.style.display = 'block';
-                    notificationBadge.textContent = data.count > 99 ? '99+' : data.count;
-                    notificationBadge.className = `position-absolute top-0 start-100 translate-middle badge rounded-pill ${getNotificationStyle(data.highest_priority).bgClass}`;
+                // Limpar container
+                notificationContainer.innerHTML = '';
+                
+                // Verificar se há notificações
+                if (data && data.length > 0) {
+                    // Agrupar por prioridade
+                    const grouped = {
+                        urgent: [],
+                        high: [],
+                        medium: [],
+                        low: []
+                    };
+                    
+                    data.forEach(notif => {
+                        if (grouped[notif.priority]) {
+                            grouped[notif.priority].push(notif);
+                        }
+                    });
+                    
+                    // Renderizar notificações urgentes
+                    if (grouped.urgent.length > 0) {
+                        const header = document.createElement('div');
+                        header.className = 'notification-header border-bottom';
+                        header.innerHTML = '<span class="small text-danger fw-bold px-3 py-2 d-block">Urgentes</span>';
+                        notificationContainer.appendChild(header);
+                        
+                        grouped.urgent.slice(0, 3).forEach(notif => {
+                            const item = createNotificationItem(notif, 'urgent');
+                            notificationContainer.appendChild(item);
+                        });
+                    }
+                    
+                    // Renderizar notificações de alta prioridade
+                    if (grouped.high.length > 0) {
+                        const header = document.createElement('div');
+                        header.className = 'notification-header border-bottom';
+                        header.innerHTML = '<span class="small text-warning fw-bold px-3 py-2 d-block">Alta Prioridade</span>';
+                        notificationContainer.appendChild(header);
+                        
+                        grouped.high.slice(0, 2).forEach(notif => {
+                            const item = createNotificationItem(notif, 'high');
+                            notificationContainer.appendChild(item);
+                        });
+                    }
+                    
+                    // Se não há notificações de alta prioridade
+                    if (grouped.urgent.length === 0 && grouped.high.length === 0) {
+                        const emptyNotif = document.createElement('a');
+                        emptyNotif.href = "#";
+                        emptyNotif.className = "text-center text-gray-500 fw-bold border-bottom border-light py-3";
+                        emptyNotif.innerText = "Nenhuma notificação prioritária";
+                        notificationContainer.appendChild(emptyNotif);
+                    }
                 } else {
-                    notificationBadge.style.display = 'none';
+                    // Sem notificações
+                    const emptyNotif = document.createElement('a');
+                    emptyNotif.href = "#";
+                    emptyNotif.className = "text-center text-gray-500 fw-bold border-bottom border-light py-3";
+                    emptyNotif.innerText = "Nenhuma notificação";
+                    notificationContainer.appendChild(emptyNotif);
                 }
+                
+                // Adicionar link para todas as notificações
+                const viewAllLink = document.createElement('a');
+                viewAllLink.href = "/notificacoes";
+                viewAllLink.className = "dropdown-item text-center fw-bold py-3";
+                viewAllLink.innerText = "Visualizar todas";
+                
+                if (data.length > 0) {
+                    const badge = document.createElement('span');
+                    badge.className = "badge bg-primary ms-2";
+                    badge.innerText = data.length;
+                    viewAllLink.appendChild(badge);
+                }
+                
+                notificationContainer.appendChild(viewAllLink);
             })
             .catch(error => {
-                console.error('Erro ao buscar contagem de notificações:', error);
-                    })
-                    .catch(error => {
-                        console.error('Erro ao carregar notificações:', error);
-                    });
-                }
-            
-                // Função auxiliar para obter ícone baseado na categoria
-                function getCategoryIcon(category) {
-                    const icons = {
-                        'document': 'fas fa-file-alt',
-                        'contract': 'fas fa-file-contract',
-                        'maintenance': 'fas fa-tools',
-                        'financial': 'fas fa-money-bill-wave',
-                        'property': 'fas fa-home',
-                        'default': 'fas fa-bell'
-                    };
-                    return icons[category] || icons.default;
-                }
+                console.error('Erro ao carregar notificações:', error);
+                notificationContainer.innerHTML = '<a href="#" class="text-center text-danger fw-bold border-bottom border-light py-3">Erro ao carregar notificações</a>';
                 
-                // Inicializar
-                if (notificationBadge) {
-                    updateNotificationCount();
-                    setInterval(updateNotificationCount, updateInterval);
-                }
-                
-                // Carregar notificações ao clicar no sino
-                if (notificationBell) {
-                    notificationBell.addEventListener('click', function() {
-                        loadNotifications();
-                    });
-                }
+                const viewAllLink = document.createElement('a');
+                viewAllLink.href = "/notificacoes";
+                viewAllLink.className = "dropdown-item text-center fw-bold py-3";
+                viewAllLink.innerText = "Visualizar todas";
+                notificationContainer.appendChild(viewAllLink);
             });
-    
-    
-    // Função para carregar as notificações não lidas no dropdown
-    function loadNotifications() {
-        if (!notificationList) return;     
-        fetch('/notifications/api/unread')
-        .then(response => response.json())
-        .then(data => {
-            notificationList.innerHTML = '';
-            
-            if (data.notifications && data.notifications.length > 0) {
-                data.notifications.forEach(notification => {
-                    const style = getNotificationStyle(notification.priority);
-                    const notifDate = new Date(notification.created_at).toLocaleString();
-                    
-                    const item = document.createElement('a');
-                    item.href = '/notifications';
-                    item.className = `list-group-item list-group-item-action border-bottom`;
-                    
-                    item.innerHTML = `
-                        <div class="row align-items-center">
-                            <div class="col-auto">
-                                <div class="icon-shape icon-xs ${style.bgClass} text-white rounded-circle">
-                                    <i class="${getCategoryIcon(notification.category)}"></i>
-                                </div>
-                            </div>
-                            <div class="col ps-0 ms-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h4 class="h6 mb-0 text-small">${notification.title}</h4>
-                                        <span class="badge ${style.bgClass} ms-2">${notification.priority}</span>
-                                    </div>
-                                    <div class="text-end">
-                                        <small class="text-muted">${notifDate}</small>
-                                    </div>
-                                </div>
-                                <p class="font-small mt-1 mb-0">${notification.message}</p>
-                            </div>
-                        </div>
-                    `;
-                    
-                    notificationList.appendChild(item);
-                });
-            } else {
-                // ... resto do código ...
-            }
-        });
-
-// Função auxiliar para obter ícone baseado na categoria
-function getCategoryIcon(category) {
-const icons = {
-    'document': 'fas fa-file-alt',
-    'contract': 'fas fa-file-contract',
-    'maintenance': 'fas fa-tools',
-    'financial': 'fas fa-money-bill-wave',
-    'property': 'fas fa-home',
-    'default': 'fas fa-bell'
-};
-return icons[category] || icons.default;
-}
-    
-    // Inicializar
-    if (notificationBadge) {
-        updateNotificationCount();
-        setInterval(updateNotificationCount, updateInterval);
     }
     
-    // Carregar notificações ao clicar no sino
+    // Função para criar um item de notificação
+    function createNotificationItem(notification, priority) {
+        const style = getNotificationStyle(priority);
+        const item = document.createElement('a');
+        item.href = "/notificacoes";
+        item.className = "list-group-item list-group-item-action border-0 border-bottom py-3 px-3";
+        
+        item.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="icon-shape icon-xs ${style.bgClass} text-white rounded-circle me-2">
+                    <i class="${style.icon}"></i>
+                </div>
+                <div>
+                    <span class="fw-bold">${notification.title}</span>
+                    <p class="small text-gray-500 mb-0">${notification.message}</p>
+                </div>
+            </div>
+        `;
+        
+        return item;
+    }
+    
+    // Adicionar evento de clique ao sino para carregar notificações
     if (notificationBell) {
         notificationBell.addEventListener('click', function() {
             loadNotifications();
         });
     }
-};
+});

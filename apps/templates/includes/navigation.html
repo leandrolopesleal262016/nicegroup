@@ -19,36 +19,78 @@
     <ul class="navbar-nav align-items-center">
       <!-- No dropdown das notificações, próximo ao perfil -->
       <li class="nav-item dropdown">
-          <a class="nav-link text-dark notification-bell unread dropdown-toggle" data-unread-notifications="true" href="#" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-              <svg class="icon icon-sm text-gray-900" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
-              </svg>
-              <!-- Adicionar o contador de notificações aqui -->
-              {% if grouped_notifications.urgent %}
-                  <span class="badge badge-sm notification-count bg-danger">{{ grouped_notifications.urgent|length }}</span>
-              {% endif %}
-          </a>
-          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-center mt-2 py-0">
-              <div class="list-group list-group-flush">
-                  {% if grouped_notifications.urgent %}
-                      {% for notification in grouped_notifications.urgent %}
-                          <a href="#" class="text-center text-primary fw-bold border-bottom border-light py-3">
-                              {{ notification.message }}
-                          </a>
-                      {% endfor %}
-                  {% else %}
-                      <a href="#" class="text-center text-primary fw-bold border-bottom border-light py-3">
-                          Nenhuma notificação urgente
-                      </a>
-                  {% endif %}
-                  
-                  <!-- Botão Visualizar Todas -->
-                  <a href="{{ url_for('home_blueprint.notification_center') }}" class="dropdown-item text-center fw-bold py-3">
-                      Visualizar todas
-                  </a>
-              </div>
-          </div>
-      </li>
+        <a class="nav-link text-dark notification-bell unread dropdown-toggle" data-unread-notifications="true" href="#" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+            <svg class="icon icon-sm text-gray-900" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+            </svg>
+            <!-- Contador de notificações com verificação de diferentes níveis de prioridade -->
+            {% if unread_urgent_count > 0 %}
+                <span class="badge badge-sm notification-count bg-danger">{{ unread_urgent_count }}</span>
+            {% elif unread_high_count > 0 %}
+                <span class="badge badge-sm notification-count bg-warning">{{ unread_high_count }}</span>
+            {% elif unread_count > 0 %}
+                <span class="badge badge-sm notification-count bg-primary">{{ unread_count }}</span>
+            {% endif %}
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-center mt-2 py-0">
+            <div class="list-group list-group-flush notification-container">
+                <!-- Área para notificações urgentes -->
+                {% if grouped_notifications.urgent %}
+                    <div class="notification-header border-bottom">
+                        <span class="small text-danger fw-bold px-3 py-2 d-block">Urgentes</span>
+                    </div>
+                    {% for notification in grouped_notifications.urgent[:3] %}
+                        <a href="{{ url_for('home_blueprint.notification_center') }}" class="list-group-item list-group-item-action border-0 border-bottom py-3 px-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2" style="width: 24px; height: 24px; text-align: center; flex-shrink: 0;">
+                                  <i class="fas fa-exclamation-circle text-danger me-2" style="font-size: 1.2rem; flex-shrink: 0;"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold">{{ notification.title }}</span>
+                                    <p class="small text-gray-500 mb-0">{{ notification.message }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- Área para notificações de alta prioridade -->
+                {% if grouped_notifications.high %}
+                    <div class="notification-header border-bottom">
+                        <span class="small text-warning fw-bold px-3 py-2 d-block">Alta Prioridade</span>
+                    </div>
+                    {% for notification in grouped_notifications.high[:2] %}
+                        <a href="{{ url_for('home_blueprint.notification_center') }}" class="list-group-item list-group-item-action border-0 border-bottom py-3 px-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2" style="width: 24px; height: 24px; text-align: center; flex-shrink: 0;">
+                                  <i class="fas fa-exclamation-triangle text-warning me-2" style="font-size: 1.2rem; flex-shrink: 0;"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold">{{ notification.title }}</span>
+                                    <p class="small text-gray-500 mb-0">{{ notification.message }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- Sem notificações -->
+                {% if not grouped_notifications.urgent and not grouped_notifications.high %}
+                    <a href="#" class="text-center text-gray-500 fw-bold border-bottom border-light py-3">
+                        Nenhuma notificação prioritária
+                    </a>
+                {% endif %}
+                
+                <!-- Botão Visualizar Todas -->
+                <a href="{{ url_for('home_blueprint.notification_center') }}" class="dropdown-item text-center fw-bold py-3">
+                    Visualizar todas
+                    {% if unread_count > 0 %}
+                        <span class="badge bg-primary ms-2">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </li>
         <li class="nav-item dropdown ms-lg-3">
           <a class="nav-link dropdown-toggle pt-1 px-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <div class="media d-flex align-items-center">
