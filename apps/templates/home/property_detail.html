@@ -87,9 +87,9 @@
                                 {% if property.status == 'alugado' %}
                                 <span class="badge bg-success">Alugado</span>
                                 {% elif property.status == 'desocupado' %}
-                                <span class="badge bg-warning">Desocupado</span>
+                                <span class="badge bg-danger">Desocupado</span> bg-danger
                                 {% elif property.status == 'em reforma' %}
-                                <span class="badge bg-danger">Em Reforma</span>
+                                <span class="badge bg-warning">Em Reforma</span>
                                 {% else %}
                                 <span class="badge bg-info">{{ property.status|capitalize }}</span>
                                 {% endif %}
