@@ -106,6 +106,14 @@
 
 {% block javascripts %}
 <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(reg => console.log('Service Worker registrado!', reg))
+                .catch(err => console.log('Erro ao registrar Service Worker:', err));
+        });
+    }
+    
     let deferredPrompt;
     const installContainer = document.getElementById('installContainer');
     const installButton = document.getElementById('installButton');
