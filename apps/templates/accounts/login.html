@@ -106,74 +106,59 @@
 
 {% block javascripts %}
 <script>
+    // 1. Registro do service worker - obrigatório para PWAs
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/static/service-worker.js')
-                .then(reg => console.log('Service Worker registrado!', reg))
-                .catch(err => console.log('Erro ao registrar Service Worker:', err));
-        });
+        navigator.serviceWorker.register('/static/service-worker.js')
+            .then(reg => console.log('Service Worker registrado'))
+            .catch(err => console.error('Erro no Service Worker:', err));
     }
     
-    let deferredPrompt;
+    // 2. Referências aos elementos
     const installContainer = document.getElementById('installContainer');
     const installButton = document.getElementById('installButton');
-
-    // Função para verificar se o app está rodando como PWA
-    function isRunningAsPWA() {
-        return window.matchMedia('(display-mode: standalone)').matches ||
-               window.navigator.standalone ||
-               document.referrer.includes('android-app://');
+    
+    // 3. Variável para armazenar o prompt
+    let deferredPrompt;
+    
+    // 4. Sempre mostrar o botão (exceto em modo standalone)
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone) {
+        installContainer.style.display = 'none';
+    } else {
+        installContainer.style.display = 'block';
     }
-
-    // Função para mostrar ou esconder o botão de instalação
-    function toggleInstallButton() {
-        if (isRunningAsPWA()) {
-            // Se estiver rodando como PWA, esconde o botão
-            installContainer.style.display = 'none';
-        } else {
-            // Se estiver rodando no navegador, sempre mostra o botão
-            installContainer.style.display = 'block';
-        }
-    }
-
-    // Chama a função imediatamente para configurar o estado inicial do botão
-    toggleInstallButton();
-
-    // Quando o evento beforeinstallprompt ocorrer, armazena para uso posterior
+    
+    // 5. Capturar o evento de instalação - obrigatório tecnicamente
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        console.log('Prompt de instalação disponível!');
+        console.log('Prompt de instalação pronto');
     });
-
-    // Manipulador para o clique no botão de instalação
+    
+    // 6. Manipulador do botão - versão mais direta possível
     installButton.addEventListener('click', async () => {
         if (deferredPrompt) {
-            // Se temos um prompt armazenado, usamos ele
+            // A. Se temos um prompt disponível, usamos diretamente
             deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to the install prompt: ${outcome}`);
+            await deferredPrompt.userChoice;
             deferredPrompt = null;
         } else {
-            // Se não temos um prompt, mostramos instruções alternativas
-            alert('Para instalar o aplicativo: \n\n' +
-                  '• No Chrome/Edge: Clique no menu (três pontos) e selecione "Instalar aplicativo"\n' +
-                  '• No Safari (iOS): Toque no ícone de compartilhamento e selecione "Adicionar à Tela de Início"\n' +
-                  '• No Firefox: Clique no menu e selecione "Instalar"');
+            // B. Se não temos prompt, mostramos instruções diretas
+            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            
+            if (isIOS) {
+                alert('Toque no ícone de compartilhar (↑) e selecione "Adicionar à Tela de Início"');
+            } else {
+                alert('Toque no menu (⋮) e selecione "Instalar aplicativo"');
+            }
         }
     });
-
-    // Detecta se o app foi instalado
+    
+    // 7. Ocultar botão após instalação
     window.addEventListener('appinstalled', () => {
-        console.log('PWA was installed');
-        toggleInstallButton();
+        installContainer.style.display = 'none';
     });
-
-    // Adiciona um listener para mudanças no modo de exibição
-    window.matchMedia('(display-mode: standalone)').addEventListener('change', toggleInstallButton);
-
-    // Executa quando a página carrega para garantir o estado correto
-    window.addEventListener('load', toggleInstallButton);
 </script>
+
 
 {% endblock javascripts %}
