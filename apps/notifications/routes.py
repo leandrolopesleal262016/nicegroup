@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 from apps import db
 from apps.notifications.models import Notification, NotificationPreference, PushSubscription
 from apps.services.notification_service import NotificationService
+from datetime import datetime
 
 # Criação do blueprint
 blueprint = Blueprint(
@@ -113,6 +114,70 @@ def mark_all_read():
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({'success': True, 'count': count})
+    
+    return redirect(url_for('notifications_blueprint.notification_center'))
+
+# Importe o novo modelo
+from apps.notifications.models import Notification, NotificationPreference, PushSubscription, NotificationResolution
+
+# Adicione este novo endpoint
+@blueprint.route('/resolve/<int:notification_id>', methods=['POST'])
+@login_required
+def resolve_notification(notification_id):
+    """
+    Endpoint para marcar uma notificação como resolvida
+    """
+    data = request.get_json() or {}
+    resolution_description = data.get('resolution_description', '')
+    
+    # Buscar a notificação
+    notification = Notification.query.filter_by(
+        id=notification_id,
+        user_id=current_user.id
+    ).first()
+    
+    if not notification:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'error': 'Notificação não encontrada'}), 404
+        return redirect(url_for('notifications_blueprint.notification_center'))
+    
+    # Verificar se já existe uma resolução
+    existing_resolution = NotificationResolution.query.filter_by(
+        notification_id=notification_id
+    ).first()
+    
+    if existing_resolution:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'error': 'Notificação já resolvida'}), 400
+        return redirect(url_for('notifications_blueprint.notification_center'))
+    
+    # Criar a resolução
+    resolution = NotificationResolution(
+        notification_id=notification_id,
+        user_id=current_user.id,
+        resolution_description=resolution_description,
+        resolved_at=datetime.now()
+    )
+    
+    # Também marcar como lida, se ainda não estiver
+    if not notification.is_read:
+        notification.is_read = True
+        notification.read_at = datetime.now()
+    
+    db.session.add(resolution)
+    db.session.commit()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'success': True,
+            'resolution': {
+                'id': resolution.id,
+                'notification_id': resolution.notification_id,
+                'resolved_by': current_user.username,
+                'description': resolution.resolution_description,
+                'resolved_at': resolution.resolved_at.strftime('%Y-%m-%dT%H:%M:%S')
+            }
+        })
     
     return redirect(url_for('notifications_blueprint.notification_center'))
 

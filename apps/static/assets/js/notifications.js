@@ -53,8 +53,39 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Erro ao buscar contagem de notificações:', error);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar notificações:', error);
+                    });
+                }
+            
+                // Função auxiliar para obter ícone baseado na categoria
+                function getCategoryIcon(category) {
+                    const icons = {
+                        'document': 'fas fa-file-alt',
+                        'contract': 'fas fa-file-contract',
+                        'maintenance': 'fas fa-tools',
+                        'financial': 'fas fa-money-bill-wave',
+                        'property': 'fas fa-home',
+                        'default': 'fas fa-bell'
+                    };
+                    return icons[category] || icons.default;
+                }
+                
+                // Inicializar
+                if (notificationBadge) {
+                    updateNotificationCount();
+                    setInterval(updateNotificationCount, updateInterval);
+                }
+                
+                // Carregar notificações ao clicar no sino
+                if (notificationBell) {
+                    notificationBell.addEventListener('click', function() {
+                        loadNotifications();
+                    });
+                }
             });
-    }
+    
     
     // Função para carregar as notificações não lidas no dropdown
     function loadNotifications() {
@@ -127,4 +158,4 @@ return icons[category] || icons.default;
             loadNotifications();
         });
     }
-});
+};

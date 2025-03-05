@@ -1,5 +1,3 @@
-<!-- apps/templates/home/notifications.html -->
-
 {% extends "layouts/base.html" %}
 
 {% block title %} Centro de Notificações {% endblock %}
@@ -23,6 +21,34 @@
     </div>
 </div>
 
+<!-- Modal de confirmação para resolver notificação -->
+<div class="modal fade" id="resolveModal" tabindex="-1" role="dialog" aria-labelledby="resolveModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resolveModalLabel">Resolver Notificação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Adicione esta seção para exibir detalhes da notificação -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Detalhes da notificação:</label>
+                    <h6 id="modal-notification-title" class="mb-1"></h6>
+                    <p id="modal-notification-message" class="text-muted small mb-3"></p>
+                </div>
+                <div class="mb-3">
+                    <label for="resolution-description" class="form-label">Descrição da resolução:</label>
+                    <textarea class="form-control" id="resolution-description" rows="3" placeholder="Descreva como a situação foi resolvida..."></textarea>
+                </div>
+                <input type="hidden" id="notification-id-to-resolve">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirm-resolve">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-12 mb-4">
         <div class="card border-0 shadow components-section">
@@ -63,16 +89,34 @@
                         <h5 class="text-danger">Urgente</h5>
                         <div class="list-group mb-4">
                             {% for notification in grouped_notifications.urgent %}
-                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-danger">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-danger {% if notification.is_resolved %}bg-success bg-opacity-10{% endif %}">
+                                <div class="d-flex align-items-center">
+                                    <!-- Indicador de prioridade (círculo) -->
+                                    <div class="me-3">
+                                        <div class="icon-shape icon-xs rounded-circle bg-danger" data-bs-toggle="tooltip" title="Urgente"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        
+                                        {% if notification.is_resolved %}
+                                        <div class="mt-2 small">
+                                            <strong>Resolução:</strong> {{ notification.resolution_text }}
+                                            <br>
+                                            <small class="text-muted">Resolvido em: {{ notification.resolved_at_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-danger mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-danger resolve-notification" data-notification-id="{{ notification.id }}" data-priority="urgent">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -83,16 +127,34 @@
                         <h5 class="text-warning">Alta</h5>
                         <div class="list-group mb-4">
                             {% for notification in grouped_notifications.high %}
-                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-warning">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-warning {% if notification.is_resolved %}bg-success bg-opacity-10{% endif %}">
+                                <div class="d-flex align-items-center">
+                                    <!-- Indicador de prioridade (círculo) -->
+                                    <div class="me-3">
+                                        <div class="icon-shape icon-xs rounded-circle bg-warning" data-bs-toggle="tooltip" title="Alta"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        
+                                        {% if notification.is_resolved %}
+                                        <div class="mt-2 small">
+                                            <strong>Resolução:</strong> {{ notification.resolution_text }}
+                                            <br>
+                                            <small class="text-muted">Resolvido em: {{ notification.resolved_at_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-warning mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-warning resolve-notification" data-notification-id="{{ notification.id }}" data-priority="high">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -103,16 +165,34 @@
                         <h5 class="text-info">Média</h5>
                         <div class="list-group mb-4">
                             {% for notification in grouped_notifications.medium %}
-                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-info">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-info {% if notification.is_resolved %}bg-success bg-opacity-10{% endif %}">
+                                <div class="d-flex align-items-center">
+                                    <!-- Indicador de prioridade (círculo) -->
+                                    <div class="me-3">
+                                        <div class="icon-shape icon-xs rounded-circle bg-info" data-bs-toggle="tooltip" title="Média"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        
+                                        {% if notification.is_resolved %}
+                                        <div class="mt-2 small">
+                                            <strong>Resolução:</strong> {{ notification.resolution_text }}
+                                            <br>
+                                            <small class="text-muted">Resolvido em: {{ notification.resolved_at_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-info mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-info resolve-notification" data-notification-id="{{ notification.id }}" data-priority="medium">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -123,16 +203,34 @@
                         <h5 class="text-success">Baixa</h5>
                         <div class="list-group">
                             {% for notification in grouped_notifications.low %}
-                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-success">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-success {% if notification.is_resolved %}bg-success bg-opacity-10{% endif %}">
+                                <div class="d-flex align-items-center">
+                                    <!-- Indicador de prioridade (círculo) -->
+                                    <div class="me-3">
+                                        <div class="icon-shape icon-xs rounded-circle bg-success" data-bs-toggle="tooltip" title="Baixa"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        
+                                        {% if notification.is_resolved %}
+                                        <div class="mt-2 small">
+                                            <strong>Resolução:</strong> {{ notification.resolution_text }}
+                                            <br>
+                                            <small class="text-muted">Resolvido em: {{ notification.resolved_at_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-success mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-success resolve-notification" data-notification-id="{{ notification.id }}" data-priority="low">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -146,15 +244,25 @@
                         <div class="list-group">
                             {% for notification in grouped_notifications.urgent %}
                             <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-danger">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                <div class="d-flex align-items-center">
+                                    <!-- Indicador de prioridade (círculo) -->
+                                    <div class="me-3">
+                                        <div class="icon-shape icon-xs rounded-circle bg-danger" data-bs-toggle="tooltip" title="Urgente"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-danger mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-danger resolve-notification" data-notification-id="{{ notification.id }}" data-priority="urgent">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -170,15 +278,21 @@
                         <div class="list-group">
                             {% for notification in grouped_notifications.high %}
                             <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-warning">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-warning mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-warning resolve-notification" data-notification-id="{{ notification.id }}" data-priority="high">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -194,15 +308,25 @@
                         <div class="list-group">
                             {% for notification in grouped_notifications.medium %}
                             <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-info">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                <div class="d-flex align-items-center">
+                                    <!-- Indicador de prioridade (círculo) -->
+                                    <div class="me-3">
+                                        <div class="icon-shape icon-xs rounded-circle bg-info" data-bs-toggle="tooltip" title="Média"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-info mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-info resolve-notification" data-notification-id="{{ notification.id }}" data-priority="medium">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -218,15 +342,25 @@
                         <div class="list-group">
                             {% for notification in grouped_notifications.low %}
                             <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 border-left-4 border-success">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-sm">{{ notification.message }}</p>
-                                    <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                <div class="d-flex align-items-center">
+                                    <!-- Indicador de prioridade (círculo) -->
+                                    <div class="me-3">
+                                        <div class="icon-shape icon-xs rounded-circle bg-success" data-bs-toggle="tooltip" title="Baixa"></div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ notification.title }}</h6>
+                                        <p class="mb-1 text-sm">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                    </div>
                                 </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-success mark-as-read" data-notification-id="{{ notification.id }}">
-                                        <span class="fas fa-check"></span>
+                                <div class="action-container">
+                                    {% if notification.is_resolved %}
+                                    <span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-success resolve-notification" data-notification-id="{{ notification.id }}" data-priority="low">
+                                        Resolver
                                     </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -245,29 +379,122 @@
 
 {% block javascripts %}
 <script>
-    // Função para marcar notificação como lida
-    document.querySelectorAll('.mark-as-read').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const notificationId = e.currentTarget.dataset.notificationId;
+    // Inicializa tooltips para ícones de prioridade
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Inicializar o modal
+        var resolveModal = new bootstrap.Modal(document.getElementById('resolveModal'));
+        
+        // Referência ao modal e seus elementos
+        const modal = document.getElementById('resolveModal');
+        const notificationIdInput = document.getElementById('notification-id-to-resolve');
+        const descriptionTextarea = document.getElementById('resolution-description');
+        const confirmButton = document.getElementById('confirm-resolve');
+            // Botões de resolução
+            document.querySelectorAll('.resolve-notification').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Armazenar o ID da notificação no modal
+                    const notificationId = this.getAttribute('data-notification-id');
+                    notificationIdInput.value = notificationId;
+                
+                    // Obter os detalhes da notificação
+                    const listItem = this.closest('.list-group-item');
+                    const title = listItem.querySelector('h6.mb-1').textContent.trim();
+                    const message = listItem.querySelector('p.mb-1.text-sm').textContent.trim();
+                
+                    // Preencher os detalhes no modal
+                    document.getElementById('modal-notification-title').textContent = title;
+                    document.getElementById('modal-notification-message').textContent = message;
+                
+                    // Limpar o campo de descrição
+                    descriptionTextarea.value = '';
+                
+                    // Abrir o modal
+                    resolveModal.show();
+                });
+            });
+        // Botão confirmar no modal
+        confirmButton.addEventListener('click', async function() {
+            const notificationId = notificationIdInput.value;
+            const description = descriptionTextarea.value;
             
             try {
-                const response = await fetch(`/api/notificacoes/${notificationId}/read`, {
+                // Mostrar indicador de carregamento
+                confirmButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...';
+                confirmButton.disabled = true;
+                
+                // Usar o novo endpoint para resolver notificações
+                const response = await fetch(`/notifications/resolve/${notificationId}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        resolution_description: description
+                    })
                 });
                 
-                if (response.ok) {
-                    // Remover ou atualizar a notificação na UI
-                    const notification = e.currentTarget.closest('.list-group-item');
-                    notification.classList.add('bg-light');
-                    notification.querySelector('.btn').disabled = true;
+                const responseData = await response.json();
+                
+                if (response.ok && responseData.success) {
+                    // Fechar o modal
+                    resolveModal.hide();
+                    
+                    // Atualizar a UI para todas as instâncias desta notificação
+                    const buttons = document.querySelectorAll(`.resolve-notification[data-notification-id="${notificationId}"]`);
+                    
+                    buttons.forEach(button => {
+                        // Adicionando verificações de null
+                        const actionContainer = button.closest('.action-container');
+                        if (actionContainer) {
+                            // Substituir o botão pelo badge "Resolvido"
+                            actionContainer.innerHTML = '<span class="badge bg-success resolution-status"><i class="fas fa-check-circle me-1"></i> Resolvido</span>';
+                        }
+                        
+                        const notificationItem = button.closest('.list-group-item');
+                        if (notificationItem) {
+                            // Adicionar classe visual à notificação inteira
+                            notificationItem.classList.add('bg-success', 'bg-opacity-10');
+                            
+                            // Adicionar detalhes da resolução (opcional)
+                            if (responseData.resolution && responseData.resolution.description) {
+                                const contentDiv = notificationItem.querySelector('div > div');
+                                if (contentDiv) {
+                                    const infoDiv = document.createElement('div');
+                                    infoDiv.className = 'mt-2 small';
+                                    infoDiv.innerHTML = `<strong>Resolução:</strong> ${responseData.resolution.description}
+                                    <br>
+                                    <small class="text-muted">Resolvido em: ${new Date().toLocaleString()}</small>`;
+                                    contentDiv.appendChild(infoDiv);
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Atualizar a página após um breve delay para mostrar todas as mudanças
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    // Erro ao resolver
+                    console.error('Erro:', responseData.error || 'Falha ao resolver notificação');
+                    alert(responseData.error || 'Ocorreu um erro ao resolver a notificação. Por favor, tente novamente.');
                 }
             } catch (error) {
-                console.error('Erro ao marcar notificação:', error);
+                console.error('Erro de conexão:', error);
+                alert(`Erro: ${error.message}`);
+            } finally {
+                // Restaurar o botão
+                confirmButton.innerHTML = 'Confirmar';
+                confirmButton.disabled = false;
             }
         });
+
     });
 </script>
 {% endblock javascripts %}

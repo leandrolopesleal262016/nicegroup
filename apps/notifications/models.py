@@ -14,6 +14,26 @@ class NotificationPriority:
     MEDIUM = 'medium'
     LOW = 'low'
 
+class NotificationResolution(db.Model):
+    """
+    Modelo para armazenar informações sobre resoluções de notificações
+    """
+    __tablename__ = 'notification_resolutions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    notification_id = db.Column(db.Integer, db.ForeignKey('notifications.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)  # Quem resolveu
+    resolution_description = db.Column(db.Text, nullable=True)
+    resolved_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relacionamentos
+    notification = db.relationship('Notification', backref=db.backref('resolution', uselist=False, lazy=True))
+    resolver = db.relationship('Users', backref=db.backref('resolved_notifications', lazy=True))
+    
+    def __repr__(self):
+        return f"<NotificationResolution {self.id} for notification {self.notification_id}>"
+
+
 class Notification(db.Model):
     __tablename__ = 'notifications'
 
@@ -52,6 +72,25 @@ class Notification(db.Model):
         if not notifications:
             return 'normal'
         return max(notifications, key=lambda x: priorities.get(x.priority, 0)).priority
+    
+    @property
+    def is_resolved(self):
+        """Verifica se a notificação foi resolvida"""
+        return hasattr(self, 'resolution') and self.resolution is not None
+    
+    @property
+    def resolution_text(self):
+        """Retorna a descrição da resolução, se houver"""
+        if self.is_resolved:
+            return self.resolution.resolution_description
+        return None
+    
+    @property
+    def resolved_at_date(self):
+        """Retorna a data de resolução, se houver"""
+        if self.is_resolved:
+            return self.resolution.resolved_at
+        return None
         
     def __repr__(self):
         return f"<Notification {self.id}: {self.title}>"
