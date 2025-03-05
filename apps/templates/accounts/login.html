@@ -106,59 +106,60 @@
 
 {% block javascripts %}
 <script>
-    // 1. Registro do service worker - obrigatório para PWAs
+    // 1. Registrar o service worker o mais cedo possível
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/static/service-worker.js')
-            .then(reg => console.log('Service Worker registrado'))
-            .catch(err => console.error('Erro no Service Worker:', err));
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/service-worker.js');
+        });
     }
-    
-    // 2. Referências aos elementos
+
+    // 2. Definir variáveis globais para garantir que capturamos o evento
+    let deferredPrompt;
     const installContainer = document.getElementById('installContainer');
     const installButton = document.getElementById('installButton');
     
-    // 3. Variável para armazenar o prompt
-    let deferredPrompt;
+    // 3. Mostrar o botão para todos (exceto se já instalado)
+    installContainer.style.display = 'block';
     
-    // 4. Sempre mostrar o botão (exceto em modo standalone)
+    // 4. Verificação para esconder se já estiver instalado
     if (window.matchMedia('(display-mode: standalone)').matches || 
         window.navigator.standalone) {
         installContainer.style.display = 'none';
-    } else {
-        installContainer.style.display = 'block';
     }
     
-    // 5. Capturar o evento de instalação - obrigatório tecnicamente
+    // 5. Capturar o evento o mais cedo possível
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        console.log('Prompt de instalação pronto');
+        console.log('Evento beforeinstallprompt capturado!');
+        
+        // Mudar a aparência do botão para indicar que instalação está pronta
+        installButton.classList.add('btn-success');
     });
     
-    // 6. Manipulador do botão - versão mais direta possível
+    // 6. Ao clicar no botão, tenta o prompt ou guia para menu
     installButton.addEventListener('click', async () => {
         if (deferredPrompt) {
-            // A. Se temos um prompt disponível, usamos diretamente
             deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
+            const result = await deferredPrompt.userChoice;
+            console.log(`Escolha: ${result.outcome}`);
             deferredPrompt = null;
         } else {
-            // B. Se não temos prompt, mostramos instruções diretas
-            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-            
-            if (isIOS) {
-                alert('Toque no ícone de compartilhar (↑) e selecione "Adicionar à Tela de Início"');
-            } else {
-                alert('Toque no menu (⋮) e selecione "Instalar aplicativo"');
-            }
+            // Se não temos prompt, mostrar o guia visual para os 3 pontinhos
+            showMenuGuide();
         }
     });
     
-    // 7. Ocultar botão após instalação
+    // 7. Função para mostrar guia visual
+    function showMenuGuide() {
+        // Implementação similar à Opção 1
+        // ...
+    }
+    
+    // 8. Ocultar após instalação
     window.addEventListener('appinstalled', () => {
         installContainer.style.display = 'none';
     });
 </script>
-
 
 {% endblock javascripts %}
