@@ -4,67 +4,60 @@
 =========================================================
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head> 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- Primary Meta Tags -->
+    <!-- Primary Meta Tags -->
 
-<title>
-  Nice Group - {% block title %}{% endblock %}
-</title>
+    <title>
+      Nice Group - {% block title %}{% endblock %}
+    </title>
 
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#262B40">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#1B2559">
 
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="title" content="Nice Group - Sistema de Gestão de Ativos Imobiliários">
-<meta name="author" content="Nice Group">
-<meta name="description" content="Sistema PWA para gerenciamento eficiente de ativos imobiliários, com recursos online e offline, notificações automáticas e análises financeiras detalhadas.">
-<meta name="keywords" content="nicegroup, nice, group, gerenciamento de imoveis" />
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://leandronicegroup.pythonanywhere.com/index">
-<meta property="og:title" content="Nice Group - Sistema de Gestão de Ativos">
-<meta property="og:description" content="Nice Group - Sistema de gestão de ativos imobiliários com recursos online e offline.">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Nice Group - Sistema de Gestão de Ativos Imobiliários">
+    <meta name="author" content="Nice Group">
+    <meta name="description" content="Sistema PWA para gerenciamento eficiente de ativos imobiliários, com recursos online e offline, notificações automáticas e análises financeiras detalhadas.">
+    <meta name="keywords" content="nicegroup, nice, group, gerenciamento de imoveis" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://leandronicegroup.pythonanywhere.com/">
+    <meta property="og:title" content="Nice Group - Sistema de Gestão de Ativos Imobiliários">
+    <meta property="og:description" content="Sistema de gerenciamento de ativos imobiliários com recursos online e offline, notificações automáticas e análises financeiras.">
+    <meta property="og:image" content="https://leandronicegroup.pythonanywhere.com/static/assets/img/nice-group-preview.jpg">
+    <meta property="og:site_name" content="Nice Group">
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://leandronicegroup.pythonanywhere.com/index">
-<meta property="twitter:title" content="Nice Group - Sistema de Gestão de Ativos">
-<meta property="twitter:description" content="Nice Group - Sistema de gestão de ativos imobiliários com recursos online e offline.">
-<meta property="og:image" content="/static/assets/img/nice-group-preview.jpg">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://leandronicegroup.pythonanywhere.com/">
+    <meta property="twitter:title" content="Nice Group - Sistema de Gestão de Ativos Imobiliários">
+    <meta property="twitter:description" content="Sistema de gerenciamento de ativos imobiliários com recursos online e offline, notificações automáticas e análises financeiras.">
+    <meta property="twitter:image" content="https://leandronicegroup.pythonanywhere.com/static/assets/img/nice-group-preview.jpg">
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://leandronicegroup.pythonanywhere.com/index">
-<meta property="twitter:title" content="Nice Group - Sistema de Gestão de Ativos">
-<meta property="twitter:description" content="Nice Group - Sistema de Gestão de Ativos">
-<meta property="twitter:image" content="/static/assets/img/nice-group-preview.jpg">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ config.ASSETS_ROOT }}/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ config.ASSETS_ROOT }}/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ config.ASSETS_ROOT }}/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="{{ config.ASSETS_ROOT }}/img/favicon/site.webmanifest">
+    <link rel="mask-icon" href="{{ config.ASSETS_ROOT }}/img/favicon/safari-pinned-tab.svg" color="#ffffff">
+    <meta name="msapplication-TileColor" content="#ffffff">
 
-<!-- Favicon -->
-<link rel="apple-touch-icon" sizes="120x120" href="{{ config.ASSETS_ROOT }}/img/favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ config.ASSETS_ROOT }}/img/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="{{ config.ASSETS_ROOT }}/img/favicon/favicon-16x16.png">
-<link rel="manifest" href="{{ config.ASSETS_ROOT }}/img/favicon/site.webmanifest">
-<link rel="mask-icon" href="{{ config.ASSETS_ROOT }}/img/favicon/safari-pinned-tab.svg" color="#ffffff">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="theme-color" content="#ffffff">
+    <link type="text/css" href="{{ config.ASSETS_ROOT }}/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+    <link type="text/css" href="{{ config.ASSETS_ROOT }}/vendor/notyf/notyf.min.css" rel="stylesheet">
+    <link type="text/css" href="{{ config.ASSETS_ROOT }}/css/volt.css" rel="stylesheet">
 
-<link type="text/css" href="{{ config.ASSETS_ROOT }}/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
-
-<link type="text/css" href="{{ config.ASSETS_ROOT }}/vendor/notyf/notyf.min.css" rel="stylesheet">
-<link type="text/css" href="{{ config.ASSETS_ROOT }}/css/volt.css" rel="stylesheet">
-
-<!-- PWA Support -->
-<link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#1B2559">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Nice Group">
-<link rel="apple-touch-icon" href="/static/assets/img/brand/icon-192x192.png">
+    <!-- PWA Support -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Nice Group">
+    <link rel="apple-touch-icon" href="/static/assets/img/brand/icon-192x192.png">
 
 <script src="{{ config.ASSETS_ROOT }}/js/offline.js"></script>
 
