@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from apps import db
 from apps.home.models import Property, PropertyImage, Document, Transaction, Alert
-from apps.home.forms import PropertyForm, DocumentForm, PropertyImageForm, TransactionForm
+from apps.home.forms import PropertyForm, DocumentForm, PropertyImageForm, TransactionForm, UserProfileForm
 import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -12,8 +12,99 @@ import uuid
 from flask import render_template, request, jsonify
 from apps.notifications.models import Notification, NotificationPriority
 from apps.services.notification_service import NotificationService
+from apps.authentication.models import Users, UserProfile
+from sqlalchemy.sql import func
 
-# Adicione estas rotas ao arquivo
+@blueprint.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = UserProfileForm()
+    
+    if form.validate_on_submit():
+        user = Users.query.get(current_user.id)
+        
+        # Processar foto de perfil
+        if form.profile_image.data and form.profile_image.data.filename:
+            # Criar os diretórios se não existirem
+            profile_upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
+            os.makedirs(profile_upload_folder, exist_ok=True)
+            
+            # Salvar o arquivo
+            profile_filename = secure_filename(form.profile_image.data.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{profile_filename}"
+            profile_path = os.path.join(profile_upload_folder, unique_filename)
+            form.profile_image.data.save(profile_path)
+            
+            # Armazenar o caminho relativo à pasta static
+            user.profile_image = f"uploads/profiles/{unique_filename}"
+            print(f"Caminho da imagem de perfil salvo: {user.profile_image}")
+        
+        # Processar imagem de capa
+        if form.cover_image.data and form.cover_image.data.filename:
+            # Criar os diretórios se não existirem
+            cover_upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'covers')
+            os.makedirs(cover_upload_folder, exist_ok=True)
+            
+            # Salvar o arquivo
+            cover_filename = secure_filename(form.cover_image.data.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{cover_filename}"
+            cover_path = os.path.join(cover_upload_folder, unique_filename)
+            form.cover_image.data.save(cover_path)
+            
+            # Armazenar o caminho relativo à pasta static
+            user.cover_image = f"uploads/covers/{unique_filename}"
+            print(f"Caminho da imagem de capa salvo: {user.cover_image}")
+        
+        # Atualizar outros campos
+        user.first_name = form.first_name.data
+        user.last_name = form.last_name.data
+        user.phone = form.phone.data
+        user.address = form.address.data
+        user.city = form.city.data
+        user.state = form.state.data
+        user.zip_code = form.zip_code.data
+        
+        # Salvar as alterações
+        db.session.commit()
+        flash('Perfil atualizado com sucesso!', 'success')
+        return redirect(url_for('home_blueprint.profile'))   
+    
+   # Preencher formulário com dados existentes
+    if not form.is_submitted():
+        # Adicionar logs para depuração
+        print(f"DEBUG - Carregando dados do usuário: {current_user.username}")
+        print(f"DEBUG - First name: {getattr(current_user, 'first_name', 'Não definido')}")
+        print(f"DEBUG - Last name: {getattr(current_user, 'last_name', 'Não definido')}")
+        print(f"DEBUG - Phone: {getattr(current_user, 'phone', 'Não definido')}")
+        
+        # Buscar o usuário diretamente do banco de dados para garantir dados atualizados
+        fresh_user = db.session.query(Users).get(current_user.id)
+        
+        # Verificar se os atributos existem antes de tentar acessá-los
+        form.first_name.data = getattr(fresh_user, 'first_name', '')
+        form.last_name.data = getattr(fresh_user, 'last_name', '')
+        form.phone.data = getattr(fresh_user, 'phone', '')
+        form.address.data = getattr(fresh_user, 'address', '')
+        form.city.data = getattr(fresh_user, 'city', '')
+        form.state.data = getattr(fresh_user, 'state', '')
+        form.zip_code.data = getattr(fresh_user, 'zip_code', '')
+        
+        # Mais logs para confirmar quais valores foram carregados
+        print(f"DEBUG - Formulário preenchido - Nome: {form.first_name.data}")
+        print(f"DEBUG - Formulário preenchido - Sobrenome: {form.last_name.data}")
+        print(f"DEBUG - Formulário preenchido - Telefone: {form.phone.data}")
+
+    # Verificar se existem mensagens de erro
+    for field, errors in form.errors.items():
+        for error in errors:
+            print(f"DEBUG - Erro no campo {field}: {error}")
+
+    return render_template(
+        'home/profile.html',
+        segment='profile',
+        form=form
+    )
+
 @blueprint.route('/notificacoes')
 @login_required
 def notification_center():
@@ -144,29 +235,134 @@ def properties():
                           properties=properties_list, 
                           active_status=status_filter)
 
+# Adicione esta rota ao arquivo apps/home/routes.py
+
+@blueprint.route('/transactions')
+@login_required
+def transactions():
+    # Buscar todas as transações e ordená-las por data (mais recentes primeiro)
+    transactions_list = Transaction.query.order_by(Transaction.date.desc()).all()
+    
+    # Contar o total de transações para paginação
+    total_transactions = Transaction.query.count()
+    
+    # Buscar todos os imóveis para o modal de adicionar transação
+    properties_list = Property.query.filter_by(owner_id=current_user.id).all()
+    
+    # Inicializar o formulário de transação
+    transaction_form = TransactionForm()
+    
+    return render_template('home/transactions.html',
+                           segment='transactions',
+                           transactions=transactions_list,
+                           total_transactions=total_transactions,
+                           properties=properties_list,
+                           transaction_form=transaction_form)
+
+# Adicione esta rota para lidar com a adição de transações a partir da página de transações
+@blueprint.route('/add-transaction', methods=['POST'])
+@login_required
+def add_global_transaction():
+    form = TransactionForm()
+    property_id = request.form.get('property_id')
+    
+    if form.validate_on_submit() and property_id:
+        try:
+            # Verificar se o imóvel selecionado existe e pertence ao usuário
+            property = Property.query.filter_by(id=property_id, owner_id=current_user.id).first()
+            if not property:
+                flash('Imóvel não encontrado ou não autorizado.', 'error')
+                return redirect(url_for('home_blueprint.transactions'))
+            
+            # Processar o comprovante se foi enviado
+            document = None
+            if form.file.data and form.file.data.filename != '':
+                file = form.file.data
+                if allowed_file(file.filename, {'pdf', 'jpg', 'jpeg', 'png'}):
+                    file_path = save_file(file, 'uploads/receipts')
+                    
+                    # Criar documento para o comprovante
+                    document = Document(
+                        title=f"Comprovante - {form.description.data or form.category.data}",
+                        filename=file.filename,
+                        path=file_path,
+                        document_type='comprovante',
+                        issue_date=form.date.data,
+                        property_id=property.id
+                    )
+                    
+                    db.session.add(document)
+                    db.session.flush()  # Obter ID sem commit
+            
+            # Criar a transação com os dados do formulário
+            transaction = Transaction(
+                date=form.date.data,
+                amount=form.amount.data,
+                type=form.type.data,
+                category=form.category.data,
+                description=form.description.data,
+                payment_method=form.payment_method.data,
+                status=form.status.data,
+                recurrence=form.recurrence.data,
+                property_id=property.id,
+                document_id=document.id if document else None
+            )
+            
+            # Adicionar e salvar no banco de dados
+            db.session.add(transaction)
+            db.session.commit()
+            
+            flash('Transação adicionada com sucesso!', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Erro ao adicionar transação: {str(e)}")
+            flash(f'Erro ao adicionar transação: {str(e)}', 'error')
+    else:
+        # Se houver erros no formulário, exibir mensagens
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'error')
+    
+    return redirect(url_for('home_blueprint.transactions'))
 
 @blueprint.route('/property/add', methods=['GET', 'POST'])
 @login_required
 def add_property():
     form = PropertyForm()
     if form.validate_on_submit():
-        property = Property(
-            address=form.address.data,
-            size=form.size.data,
-            property_type=form.property_type.data,
-            status=form.status.data,
-            rent_value=form.rent_value.data,
-            iptu=form.iptu.data,
-            condominium_fee=form.condominium_fee.data,
-            description=form.description.data,
-            is_condominium=form.is_condominium.data,
-            adjustment_index=form.adjustment_index.data,
-            owner_id=current_user.id
-        )
-        db.session.add(property)
-        db.session.commit()
-        flash('Imóvel adicionado com sucesso!', 'success')
-        return redirect(url_for('home_blueprint.properties'))
+        try:
+            property = Property(
+                address=form.address.data,
+                size=form.size.data,
+                property_type=form.property_type.data,
+                status=form.status.data,
+                rent_value=form.rent_value.data,
+                iptu=form.iptu.data,
+                condominium_fee=form.condominium_fee.data,
+                description=form.description.data,
+                is_condominium=form.is_condominium.data,
+                adjustment_index=form.adjustment_index.data,
+                owner_id=current_user.id
+            )
+            db.session.add(property)
+            db.session.commit()
+            flash('Imóvel adicionado com sucesso!', 'success')
+            
+            # Registrar ação (opcional)
+            print(f"Propriedade criada: ID {property.id} por usuário {current_user.username}")
+            
+            return redirect(url_for('home_blueprint.properties'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Erro ao adicionar imóvel: {str(e)}")
+            flash('Erro ao adicionar imóvel. Por favor, tente novamente.', 'danger')
+    
+    # Se houver erros no formulário, mostrar mensagens
+    if form.errors:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'danger')
     
     return render_template('home/property_form.html',
                            segment='properties',

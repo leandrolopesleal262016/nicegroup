@@ -94,7 +94,32 @@
   .rounded-circle {
     border-radius: 50% !important;
   }
+  
+  .profile-cover {
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+  }
+  
+  .avatar-xl {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+  }
+  
+  .file-field input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      z-index: -1;
+  }
+  
+  .file-field label {
+      cursor: pointer;
+  }
 </style>
+
 
 <!-- Specific Page JS goes HERE  -->    
 {% block stylesheets %}{% endblock stylesheets %}

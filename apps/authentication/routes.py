@@ -2,7 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-
+from apps.authentication.util import hash_pass 
 from flask import render_template, redirect, request, url_for
 from flask_login import (
     current_user,
@@ -70,6 +70,7 @@ def register():
 
         username = request.form['username']
         email = request.form['email']
+        password = request.form['password']
 
         # Check usename exists
         user = Users.query.filter_by(username=username).first()
@@ -87,8 +88,16 @@ def register():
                                    success=False,
                                    form=create_account_form)
 
-        # else we can create the user
-        user = Users(**request.form)
+        # else we can create the user - aplicando o hash_pass diretamente
+        from apps.authentication.util import hash_pass
+        hashed_password = hash_pass(password)
+        
+        # Cria o usuário com a senha já em hash
+        user = Users()
+        user.username = username
+        user.email = email
+        user.password = hashed_password
+        
         db.session.add(user)
         db.session.commit()
 
@@ -102,7 +111,6 @@ def register():
 
     else:
         return render_template('accounts/register.html', form=create_account_form)
-
 
 @blueprint.route('/logout')
 def logout():

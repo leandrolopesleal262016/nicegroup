@@ -125,3 +125,31 @@ class TransactionForm(FlaskForm):
         Optional(),
         FileAllowed(['pdf', 'jpg', 'jpeg', 'png'], 'Somente PDF, JPG ou PNG')
     ])
+
+    # Adicione ao arquivo apps/home/forms.py
+
+class UserProfileForm(FlaskForm):
+    first_name = StringField('Nome', validators=[Optional()])
+    last_name = StringField('Sobrenome', validators=[Optional()])
+    phone = StringField('Telefone', validators=[Optional()])
+    address = StringField('Endereço', validators=[Optional()])
+    city = StringField('Cidade', validators=[Optional()])
+    state = SelectField('Estado', choices=[
+        ('', 'Selecione um estado'),
+        ('AC', 'Acre'), ('AL', 'Alagoas'), ('AP', 'Amapá'), ('AM', 'Amazonas'),
+        ('BA', 'Bahia'), ('CE', 'Ceará'), ('DF', 'Distrito Federal'), ('ES', 'Espírito Santo'),
+        ('GO', 'Goiás'), ('MA', 'Maranhão'), ('MT', 'Mato Grosso'), ('MS', 'Mato Grosso do Sul'),
+        ('MG', 'Minas Gerais'), ('PA', 'Pará'), ('PB', 'Paraíba'), ('PR', 'Paraná'),
+        ('PE', 'Pernambuco'), ('PI', 'Piauí'), ('RJ', 'Rio de Janeiro'), ('RN', 'Rio Grande do Norte'),
+        ('RS', 'Rio Grande do Sul'), ('RO', 'Rondônia'), ('RR', 'Roraima'), ('SC', 'Santa Catarina'),
+        ('SP', 'São Paulo'), ('SE', 'Sergipe'), ('TO', 'Tocantins')
+    ], validators=[Optional()])
+    zip_code = StringField('CEP', validators=[Optional()])
+    profile_image = FileField('Foto de Perfil', validators=[
+        Optional(),
+        FileAllowed(['jpg', 'jpeg', 'png'], 'Somente JPG ou PNG')
+    ])
+    cover_image = FileField('Imagem de Fundo', validators=[
+        Optional(),
+        FileAllowed(['jpg', 'jpeg', 'png'], 'Somente JPG ou PNG')
+    ])

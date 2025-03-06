@@ -1,0 +1,255 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Meu Perfil {% endblock %}
+
+{% block content %}
+
+<div class="py-4">
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+        <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+            <li class="breadcrumb-item">
+                <a href="/">
+                    <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Meu Perfil</li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between w-100 flex-wrap">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="h4">Meu Perfil</h1>
+            <p class="mb-0">Gerencie suas informações pessoais</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Card de perfil - Vai aparecer primeiro em telas pequenas -->
+    <div class="col-12 col-xl-4 order-1 order-xl-2">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow border-0 text-center p-0">
+                    {% if current_user.cover_image %}
+                        <div class="profile-cover rounded-top" style="background-image: url('{{ url_for('static', filename=current_user.cover_image) }}'); background-size: cover; background-position: center; height: 180px;"></div>
+                    {% else %}
+                        <div class="profile-cover rounded-top" style="background-image: url('{{ config.ASSETS_ROOT }}/img/profile-cover.jpg'); background-size: cover; background-position: center; height: 180px;"></div>
+                    {% endif %}
+                    <div class="card-body pb-5">
+                        {% if current_user.profile_image %}
+                            <img src="{{ url_for('static', filename=current_user.profile_image) }}" class="avatar-xl rounded-circle mx-auto mt-n7 mb-4" alt="Foto de Perfil" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                            <img src="{{ config.ASSETS_ROOT }}/img/team/profile-picture-3.jpg" class="avatar-xl rounded-circle mx-auto mt-n7 mb-4" alt="Foto de Perfil" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% endif %}
+                        
+                        <h4 class="h3">
+                            {% if current_user.first_name and current_user.last_name %}
+                                {{ current_user.first_name }} {{ current_user.last_name }}
+                            {% else %}
+                                {{ current_user.username }}
+                            {% endif %}
+                        </h4>
+                        <h5 class="fw-normal">
+                            {{ current_user.username }}
+                        </h5>
+                        <p class="text-gray mb-4">
+                            {{ current_user.email }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card card-body border-0 shadow mb-4">
+                    <h2 class="h5 mb-4">Selecionar Foto de Perfil</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {{ form.csrf_token }}
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <img id="profile-preview" class="rounded avatar-xl" src="{% if current_user.profile_image %}{{ url_for('static', filename=current_user.profile_image) }}{% else %}{{ config.ASSETS_ROOT }}/img/team/profile-picture-3.jpg{% endif %}" alt="Foto de Perfil" style="width: 120px; height: 120px; object-fit: cover;">
+                            </div>
+                            <div class="file-field">
+                                <div class="d-flex justify-content-xl-center ms-xl-3">
+                                    <div class="d-flex">
+                                        <span class="icon icon-xs text-gray-500 me-2">
+                                            <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd"></path></svg>
+                                        </span>
+                                        {{ form.profile_image(class="form-control d-none", id="upload-profile-pic") }}
+                                        <label for="upload-profile-pic" class="d-md-block text-left" style="cursor: pointer;">
+                                            <div id="profile-filename" class="fw-normal text-dark mb-1">Escolher Imagem</div>
+                                            <div class="text-gray small">JPG, GIF ou PNG. Tamanho máximo de 800KB</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h2 class="h5 mt-4 mb-4">Selecionar Imagem de Fundo</h2>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <img id="cover-preview" class="rounded" style="width: 100px; height: 60px; object-fit: cover;" src="{% if current_user.cover_image %}{{ url_for('static', filename=current_user.cover_image) }}{% else %}{{ config.ASSETS_ROOT }}/img/profile-cover.jpg{% endif %}" alt="Imagem de Fundo">
+                            </div>
+                            <div class="file-field">
+                                <div class="d-flex justify-content-xl-center ms-xl-3">
+                                    <div class="d-flex">
+                                        <span class="icon icon-xs text-gray-500 me-2">
+                                            <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd"></path></svg>
+                                        </span>
+                                        {{ form.cover_image(class="form-control d-none", id="upload-cover-pic") }}
+                                        <label for="upload-cover-pic" class="d-md-block text-left" style="cursor: pointer;">
+                                            <div id="cover-filename" class="fw-normal text-dark mb-1">Escolher Imagem</div>
+                                            <div class="text-gray small">JPG, GIF ou PNG. Tamanho máximo de 800KB</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="submit" name="image_form" class="btn btn-primary">Atualizar Imagens</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Formulário de informações - Vai aparecer depois do card em telas pequenas -->
+    <div class="col-12 col-xl-8 order-2 order-xl-1">
+        <div class="card card-body border-0 shadow mb-4">
+            <h2 class="h5 mb-4">Informações Gerais</h2>
+            <form method="post" enctype="multipart/form-data">
+                {{ form.csrf_token }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div>
+                            <label for="first_name">{{ form.first_name.label }}</label>
+                            {{ form.first_name(class="form-control", placeholder="Digite seu nome") }}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div>
+                            <label for="last_name">{{ form.last_name.label }}</label>
+                            {{ form.last_name(class="form-control", placeholder="Digite seu sobrenome") }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div>
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" value="{{ current_user.email }}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div>
+                            <label for="phone">{{ form.phone.label }}</label>
+                            {{ form.phone(class="form-control", placeholder="(00) 00000-0000") }}
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="h5 my-4">Endereço</h2>
+                
+                <div class="row">
+                    <div class="col-sm-9 mb-3">
+                        <div>
+                            <label for="address">{{ form.address.label }}</label>
+                            {{ form.address(class="form-control", placeholder="Digite seu endereço") }}
+                        </div>
+                    </div>
+                    <div class="col-sm-3 mb-3">
+                        <div>
+                            <label for="zip_code">{{ form.zip_code.label }}</label>
+                            {{ form.zip_code(class="form-control", placeholder="00000-000") }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <div>
+                            <label for="city">{{ form.city.label }}</label>
+                            {{ form.city(class="form-control", placeholder="Digite sua cidade") }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="state">{{ form.state.label }}</label>
+                        {{ form.state(class="form-select") }}
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-gray-800 mt-2 animate-up-2" type="submit" name="info_form">Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Script para preview da imagem de perfil
+        document.getElementById('upload-profile-pic').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                // Atualizar nome do arquivo
+                var fileName = this.files[0].name;
+                document.getElementById('profile-filename').textContent = fileName;
+                
+                // Mostrar preview da imagem
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-preview').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Script para preview da imagem de capa
+        document.getElementById('upload-cover-pic').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                // Atualizar nome do arquivo
+                var fileName = this.files[0].name;
+                document.getElementById('cover-filename').textContent = fileName;
+                
+                // Mostrar preview da imagem
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('cover-preview').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Funcionalidade para capa de perfil
+        [].slice.call(document.querySelectorAll('[data-background]')).map(function(el) {
+            el.style.background = 'url(' + el.getAttribute('data-background') + ')';
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center center';
+        });
+        
+        // Funcionalidade para CEP
+        const cepInput = document.getElementById('zip_code');
+        if (cepInput) {
+            cepInput.addEventListener('blur', function() {
+                const cep = this.value.replace(/\D/g, '');
+                if (cep.length === 8) {
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.erro) {
+                                document.getElementById('address').value = data.logradouro;
+                                document.getElementById('city').value = data.localidade;
+                                document.getElementById('state').value = data.uf;
+                            }
+                        })
+                        .catch(error => console.error('Erro ao buscar CEP:', error));
+                }
+            });
+        }
+    });
+</script>
+{% endblock javascripts %}
