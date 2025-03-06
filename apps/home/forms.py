@@ -33,23 +33,35 @@ class PropertyForm(FlaskForm):
 
 class DocumentForm(FlaskForm):
     title = StringField('Título', validators=[DataRequired()])
+    
     document_type = SelectField('Tipo de Documento', choices=[
         ('contrato', 'Contrato de Locação'),
         ('avcb', 'AVCB/CLB'),
         ('cnd', 'Certidão Negativa de Débitos'),
         ('escritura', 'Escritura'),
-        ('nota_fiscal', 'Nota Fiscal'),
-        ('conta', 'Conta de Consumo'),
         ('comprovante', 'Comprovante de Pagamento'),
+        ('procuracao', 'Procuração'),
+        ('iptu', 'IPTU'),
+        ('matricula', 'Matricula'),
+        ('projeto', 'Projeto'),
+        ('valor_aquisicao', 'Valor da aquisição'),
+        ('valuation_m2', 'Valuation por m²'),
+        ('valuation_roi', 'Valuation por ROI'),
+        ('valuation_loq', 'Valuation por Loq'),
+        ('laudos', 'Laudos'),
+        ('fotos', 'Fotos'),
         ('outros', 'Outros')
     ], validators=[DataRequired()])
+    
     file = FileField('Arquivo', validators=[
         DataRequired(),
         FileAllowed(['pdf', 'jpg', 'png'], 'Somente PDF, JPG ou PNG')
     ])
+    
     issue_date = DateField('Data de Emissão', validators=[Optional()])
     expiry_date = DateField('Data de Vencimento', validators=[Optional()])
     description = TextAreaField('Descrição', validators=[Optional()])
+
 
 class PropertyImageForm(FlaskForm):
     file = FileField('Imagem', validators=[
@@ -62,12 +74,14 @@ class PropertyImageForm(FlaskForm):
     issue_coordinates = StringField('Coordenadas do Problema', validators=[Optional()])
 
 class TransactionForm(FlaskForm):
+
     date = DateField('Data', validators=[DataRequired()])
     amount = FloatField('Valor (R$)', validators=[DataRequired()])
     type = SelectField('Tipo', choices=[
         ('receita', 'Receita'),
         ('despesa', 'Despesa')
     ], validators=[DataRequired()])
+    
     category = SelectField('Categoria', choices=[
         ('aluguel', 'Aluguel'),
         ('condominio', 'Condomínio'),
@@ -78,8 +92,16 @@ class TransactionForm(FlaskForm):
         ('conta_gas', 'Conta de Gás'),
         ('conta_internet', 'Internet'),
         ('seguro', 'Seguro'),
+        ('multa', 'Multa'),
+        ('juros', 'Juros'),
+        ('correcao', 'Correção'),
+        ('cartorio', 'Cartório'),
+        ('copias', 'Cópias'),
+        ('projetos', 'Projetos'),
+        ('compras', 'Compras'),
         ('outros', 'Outros')
     ], validators=[DataRequired()])
+
     description = TextAreaField('Descrição', validators=[Optional()])
     payment_method = SelectField('Método de Pagamento', choices=[
         ('dinheiro', 'Dinheiro'),
